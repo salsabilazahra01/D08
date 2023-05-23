@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="modalDelete(id, jenisReward)">
+  <a type="button" class="mx-2 btn-small btn-red-danger" data-bs-toggle="modal" th:data-bs-target="'#delete' + ${id}">
+    Delete
+  </a>
+  <!-- Modal -->
+  <div class="modal fade" th:id="'delete' + ${id}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title h6" id="exampleModalLabel">Hapus Reward</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menghapus reward ' + ${jenisReward} + ' (' + ${id} + ')?'">
+        </div>
+        <div class="modal-footer justify-content-center">
+          <a type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</a>
+          <a type="button" th:href="@{'/reward/' + ${id} + '/delete'}" id="submitbutton" class="btn-small btn-red-danger">Ya, Hapus</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end modal -->
+</div>
+</body>
+</html>

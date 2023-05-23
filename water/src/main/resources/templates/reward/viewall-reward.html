@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="fragments/fragment :: navbar('Donasi', '')"></nav>
+  <main class="container flex-grow-1 pt-lg-5">
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+    <article class="card rounded-25 m-4 p-4">
+      <section class="card-body justify-content-center">
+        <header class="row mt-2 mb-4">
+          <h2 class="col text-start h2">Daftar Jenis Reward</h2>
+          <div class="col text-end">
+            <a button type="button" class="btn-small btn-outline-primary-green h6" th:href="@{/reward/add}">
+              <span class="bi-plus"></span> Tambah Jenis Reward
+            </a>
+<!--            <button type="button" class="btn-small btn-outline-secondary h6">-->
+<!--              <span class="bi-plus"></span> Filter-->
+<!--            </button>-->
+          </div>
+        </header>
+        <main class="section" id="listOfUsers">
+          <table class="table table-striped table-hover text-center align-middle">
+            <thead>
+              <tr>
+                <th>ID Jenis Reward</th>
+                <th>Jenis Reward</th>
+                <th>Poin Ekuivalen</th>
+                <th>Harga Reward</th>
+                <th colspan="2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- For each thymeleaf rewards -->
+              <tr th:each="reward : ${rewards}">
+                <td>[[${reward.idReward}]]</td>
+                <td>[[${reward.jenisReward()}]]</td>
+                <td>[[${reward.poin}]]</td>
+                <td>[[${reward.harga}]]</td>
+                <td>
+                  <a th:href="@{/reward/{id}/edit(id=${reward.idReward})}"
+                    class="btn-small btn-primary-green h6">
+                    <span></span> Update
+                  </a>
+                </td>
+                <td>
+                  <div th:replace="fragments/fragment-reward :: modalDelete(${reward.idReward}, ${reward.jenisReward()})"></div>
+                </td>
+
+              </tr>
+              <tr th:unless="${rewards.size}">
+                <th colspan="6" class="h4 p-4 text-center">This list is empty</th>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="row mt-4 p3">
+            <page-size class="col text-start">
+              <label class="d-inline-block p3" for="pageSize">Show: </label>
+              <select name="size" th:value="${pageSize}" class="form-select form-select-sm d-inline-block"
+                style="width:auto;" id="pageSize" onchange="updatePageSize()">
+                <option th:each="s : ${ {5, 10, 15, 20} }" th:value="${s}" th:text="${s}"
+                  th:selected="${s == pageSize}"></option>
+              </select>
+              
+              <p class="d-inline-block p3"
+                th:text="'Result: ' + ${firstItem} + '-' + ${lastItem} + ' of ' + ${totalItems}"></p>
+            </page-size>
+
+
+
+            <page-navigation class="col text-end">
+              <nav class="d-inline-block" aria-label="Pagination" th:if="${totalPages > 0}">
+                <ul class="pagination">
+                  <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+
+                    <a class="fw-bold page-link" th:href="@{|?page=${currentPage - 1}&size=${pageSize}}" th:data-page="${currentPage - 1}"
+                      title="Previous Page" rel="tooltip">
+                      [[${'Previous'}]]
+                    </a>
+                  </li>
+                  <li class="page-item" th:classappend="${1 == currentPage} ? 'active'">
+                    <a class="fw-bold page-link" th:href="@{|?page=${1}&size=${pageSize}}" data-page="1" title="First Page"
+                      rel="tooltip">
+                      [[${'1'}]]
+                    </a>
+                  </li>
+                  <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                    <a class="page-link" href="#">...</a>
+                  </li>
+                  <li
+                    th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 1 : 1, currentPage + 2 < totalPages ? currentPage + 1 : totalPages)}"
+                    class="page-item" th:classappend="${page == currentPage} ? 'active'">
+                    <a class="fw-bold page-link" th:if="${page != 1 && page != totalPages}"
+                      th:href="@{|?page=${page}&size=${pageSize}}" th:data-page="${page}" title="Last Page" rel="tooltip">
+                      [[${page}]]
+                    </a>
+                  </li>
+                  <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                    <a class="page-link" href="#">...</a>
+                  </li>
+                  <li class="page-item" th:if="${1 != totalPages}"
+                    th:classappend="${totalPages == currentPage} ? 'active'">
+                    <a class="fw-bold page-link" th:href="@{|?page=${totalPages}&size=${pageSize}}" th:data-page="${totalPages}"
+                      title="Last Page" rel="tooltip">
+                      [[${totalPages}]]
+                    </a>
+                  </li>
+                  <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                    <a class="fw-bold page-link" th:href="@{|?page=${currentPage + 1}&size=${pageSize}}" th:data-page="${currentPage + 1}"
+                      title="Next Page" rel="tooltip">
+                      [[${'Next'}]]
+                    </a>
+                  </li>
+
+                </ul>
+              </nav>
+            </page-navigation>
+            <script>
+              function updatePageSize() {
+                var selectBox = document.getElementById("pageSize");
+                var pageSize = selectBox.options[selectBox.selectedIndex].value;
+                var urlParams = new URLSearchParams(window.location.search);
+                urlParams.set("size", pageSize);
+                window.location.search = urlParams.toString();
+              }
+              const pageLinks = document.querySelectorAll('.page-link');
+          
+              pageLinks.forEach(link => {
+                link.addEventListener('click', event => {
+                  event.preventDefault();
+                  const newPage = link.dataset.page;
+                  const searchParams = new URLSearchParams(window.location.search);
+                  searchParams.set('page', newPage);
+                  window.location.search = searchParams.toString();
+                });
+              });
+            </script>
+          </div>
+          <!-- end pagination & page size -->
+        </main>
+      </section>
+    </article>
+  </main>
+
+  <footer th:replace="fragments/fragment :: footer"></footer>
+
+  <th:block th:include="fragments/scripts :: scripts"></th:block>
+  
+</body>
+
+</html>

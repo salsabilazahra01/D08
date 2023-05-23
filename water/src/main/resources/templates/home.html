@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav sec:authorize="!hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Home', '')"></nav>
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Home', ${poin})"></nav>
+
+<!-- SCROLL UP BUTTON -->
+<button onclick="topFunction()" class="scrollUpBtn" id="scrollUpBtn" title="Go to top">
+    <span class="bi bi-chevron-double-up align-items-center"></span>
+</button>
+
+<!-- WELCOME SECTION -->
+<main class="main">
+    <section id="sec-welcome" class="home">
+        <div class="home__container container">
+            <div class="home__img">
+                <img th:src = "@{/images/peeking-girl.png}" alt="">
+                <div class="home__shadow"></div>
+            </div>
+            <div class="home__data">
+
+                <!-- guest view -->
+                <div sec:authorize="!isAuthenticated">
+                    <h2 class = "h2 animated-text1">Selamat Datang di</h2>
+                    <h1 class = "h-home username-welcome-text animated-text2">CV Prisma Rizki Barokah!</h1>
+                    <a type="button" class="scrollDownBtn" onClick="document.getElementById('sec-tentang-kami').scrollIntoView();">
+                        <span class="bi bi-chevron-double-down fw-bolder"></span>
+                    </a>
+                </div>
+
+                <!-- donatur partner customer view -->
+                <div sec:authorize="hasAuthority('DONATUR') || hasAuthority('PARTNER') || hasAuthority('CUSTOMER')">
+                    <h2 class = "h2 animated-text1">Selamat Datang,</h2>
+                    <h1 class = "h-home username-welcome-text animated-text2" th:text="${user.username}"></h1>
+                    <a type="button" class="scrollDownBtn" onClick="document.getElementById('sec-tentang-kami').scrollIntoView();">
+                        <span class="bi bi-chevron-double-down fw-bolder"></span>
+                    </a>
+                </div>
+
+                <!-- internal view -->
+                <div sec:authorize="!hasAuthority('DONATUR') && !hasAuthority('PARTNER') && !hasAuthority('CUSTOMER') && isAuthenticated()">
+                    <h2 class = "h2 animated-text1">Selamat Datang,</h2>
+                    <h1 class = "h-home username-welcome-text animated-text2" th:text="${user.username}"></h1>
+                    <a type="button" class="scrollDownBtn" onClick="document.getElementById('sec-internal').scrollIntoView();">
+                        <span class="bi bi-chevron-double-down fw-bolder"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- DONATUR PARTNER CUSTOMER VIEW -->
+<div sec:authorize="hasAuthority('DONATUR') || hasAuthority('PARTNER') || hasAuthority('CUSTOMER') || !isAuthenticated()">
+    <section id="sec-tentang-kami" class = "p-5 text-white container-primary-green">
+        <div class = "row mx-4 my-3">
+            <div class = "col">
+                <h1 class = "h1">Tentang Kami</h1>
+            </div>
+        </div>
+        <div class = "row">
+            <div class = "col-lg-6 p-5">
+                <img src = "images/tentang-kita.jpg" class = "img-fluid rounded-25">
+            </div>
+            <div class = "col-lg-6 p-5 text-white text-center text-lg-start">
+                <p class = "p2 my-5 lead" th:text="${companyProfile.deskripsiPerusahaan}"></p>
+                <a type = "button" class = "btn btn-about-us h5 text-white mt-4" th:href="@{/about-us/view}">
+                    <span class="bi-arrow-right"></span> Baca lebih lanjut
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id = "sec-what-we-offer" class = "py-5">
+        <div class = "container my-4">
+            <div class = "row mb-5">
+                <div class = "col text-center">
+                    <h1 class = "mb-4 h1">Apa yang kami tawarkan?</h1>
+                    <p class = "pt-2 w-75 mx-auto p2"></p>
+                </div>
+            </div>
+
+            <div class = "row gx-md-5">
+                <div class = "col-md-4 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-1-img.jpg">
+                        <div class = "card-body py-5">
+                            <h3 class = "card-title h3">Donasi Sampah</h3>
+                            <p class = "card-text py-3 p3">
+                                Anda dapat mendonasikan sampah plastik
+                                yang ada di rumah Anda dan mendapatkan poin sebagai imbalan
+                                yang nantinya dapat ditukarkan menjadi uang ataupun barang.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-4 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/img-handshake.jpg">
+                        <div class = "card-body py-5">
+                            <h3 class = "card-title h3">Penjualan Sampah</h3>
+                            <p class = "card-text py-3 p3">
+                                Anda dapat menjalin kerjasama dengan kami
+                                dan menjualkan sampah plastik Anda dengan harga yang
+                                bersaing. Jadilah partner apabila Anda memiliki usaha
+                                seperti pelapak sampah, bank sampah, dan lain-lain.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-4 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/img-penjualan-hasil-olahan.jpg">
+                        <div class = "card-body py-5">
+                            <h3 class = "card-title h3">Pembelian Hasil Olahan Sampah</h3>
+                            <p class = "card-text py-3 p3">
+                                Anda dapat membeli bulir hasil olahan
+                                sampah plastik kami yang berkualitas tinggi dengan harga
+                                bersaing.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div th:if="${listTestimoni.size()!=0}">
+        <section id = "sec-testimoni" class = "py-5 container-primary-green text-white">
+        <div class = "container my-5">
+
+            <div class = "row">
+                <div class = "col-12 text-center">
+                    <h3 class = "mb-5 h1">Testimoni</h3>
+                </div>
+            </div>
+
+            <div class = "row">
+                <div id = "carouselInd" class = "carousel slide" data-bs-ride = "carousel">
+
+                    <div class = "carousel-indicators">
+                        <button type = "button" data-bs-target = "#carouselInd" data-bs-slide-to = "0" class = "active bg-white" th:if="*{listTestimoni.size() >= 1}"></button>
+                        <button type = "button" data-bs-target = "#carouselInd" data-bs-slide-to = "1" class = "bg-white" th:if="*{listTestimoni.size() >= 2}"></button>
+                        <button type = "button" data-bs-target = "#carouselInd" data-bs-slide-to = "2" class = "bg-white" th:if="*{listTestimoni.size() >= 3}"></button>
+                        <button type = "button" data-bs-target = "#carouselInd" data-bs-slide-to = "3" class = "bg-white" th:if="*{listTestimoni.size() >= 4}"></button>
+                        <button type = "button" data-bs-target = "#carouselInd" data-bs-slide-to = "4" class = "bg-white" th:if="*{listTestimoni.size() >= 5}"></button>
+                    </div>
+
+                    <div class = "carousel-inner">
+                        <div class = "carousel-item active" th:if="*{listTestimoni.size() >= 1}">
+                            <div class = "col-12 row mx-auto ">
+                                <div class = "row text-center text-lg-start">
+                                    <p class = "p2" th:text="*{listTestimoni[0].review}"></p>
+                                    <h5 class = "h5 text-lg-end" th:text="*{listTestimoni[0].namaPembuatTestimoni}"></h5>
+                                    <p class = "p2 text-lg-end" th:text="*{listTestimoni[0].role}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class = "carousel-item" th:if="*{listTestimoni.size() >= 2}">
+                            <div class = "col-12 row mx-auto ">
+                                <div class = "row text-center text-lg-start">
+                                    <p class = "p2" th:text="*{listTestimoni[1].review}"></p>
+                                    <h5 class = "h5 text-lg-end" th:text="*{listTestimoni[1].namaPembuatTestimoni}"></h5>
+                                    <p class = "p2 text-lg-end" th:text="*{listTestimoni[1].role}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class = "carousel-item" th:if="*{listTestimoni.size() >= 3}">
+                            <div class = "col-12 row mx-auto ">
+                                <div class = "row text-center text-lg-start">
+                                    <p class = "p2" th:text="*{listTestimoni[2].review}"></p>
+                                    <h5 class = "h5 text-lg-end" th:text="*{listTestimoni[2].namaPembuatTestimoni}"></h5>
+                                    <p class = "p2 text-lg-end" th:text="*{listTestimoni[2].role}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class = "carousel-item" th:if="*{listTestimoni.size() >= 4}">
+                            <div class = "col-12 row mx-auto ">
+                                <div class = "row text-center text-lg-start">
+                                    <p class = "p2" th:text="*{listTestimoni[3].review}"></p>
+                                    <h5 class = "h5 text-lg-end" th:text="*{listTestimoni[3].namaPembuatTestimoni}"></h5>
+                                    <p class = "p2 text-lg-end" th:text="*{listTestimoni[3].role}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class = "carousel-item" th:if="*{listTestimoni.size() >= 5}">
+                            <div class = "col-12 row mx-auto ">
+                                <div class = "row text-center text-lg-start">
+                                    <p class = "p2" th:text="*{listTestimoni[4].review}"></p>
+                                    <h5 class = "h5 text-lg-end" th:text="*{listTestimoni[4].namaPembuatTestimoni}"></h5>
+                                    <p class = "p2 text-lg-end" th:text="*{listTestimoni[4].role}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </div>
+
+    <section id = "sec-artikel" class = "py-5">
+        <div class = "container my-2">
+            <div class = "row">
+                <div class = "col text-start">
+                    <h1 class = "h1">Artikel</h1>
+                </div>
+                <div class = "col text-end">
+                    <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/artikel/viewall}">
+                        Lihat semua artikel
+                    </a>
+                </div>
+            </div>
+
+            <div class = "row gx-md-5" th:if="${listArtikel.size!=0}">
+
+
+                <div class = "col-md-4 my-3 d-flex align-items-stretch" th:each="artikel, iterationStatus : ${listArtikel}">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" th:src="'/images/'+${artikel.idArtikel}+'/'+${artikel.imageTitle}"
+                             alt="Artikel Image">
+                        <div class = "card-body py-5">
+                            <div class="card-title h3" th:text="${artikel.title}"></div>
+                            <p class="card-text py-3 p3" th:utext="${artikel.subtitle}"></p>
+                            <a type="button" class="btn btn-primary-green h5 mt-4"
+                               th:href="@{/artikel/view/} + ${artikel.idArtikel}">Baca Artikel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:unless="*{listArtikel.size()!=0}">
+                <h4 class="h4 p-2 text-center">Artikel Tidak Tersedia</h4>
+            </div>
+
+
+        </div>
+    </section>
+
+    <footer th:replace="fragments/fragment :: footer"></footer>
+</div>
+
+<!-- INTERNAL VIEW -->
+<div sec:authorize="!hasAuthority('DONATUR') && !hasAuthority('PARTNER') && !hasAuthority('CUSTOMER') && isAuthenticated()">
+
+    <section id = "sec-internal" class = "py-5 container-primary-green text-white">
+        <div class = "container my-4">
+            <div class = "row mb-5">
+                <div class = "col text-center">
+                    <h1 class = "mb-4 h1">Apa yang ingin Anda lakukan hari ini?</h1>
+                </div>
+            </div>
+
+            <div class = "row gx-md-5">
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/img-donasi.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Donasi Sampah</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/donasi/viewall}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/img-handshake.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Pembelian Sampah</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/penawaran/sampah/viewall}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/img-penjualan-hasil-olahan.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Penjualan Hasil Olahan Sampah</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/penawaran-hasil-olahan/viewall/-1}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-1-img.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Penukaran Poin</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/donasi/penukaran-poin}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class = "row gx-md-5">
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-2-img.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Laporan Pengolahan Sampah</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/pengolahan-sampah}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-1-img.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Laporan Warehouse</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/warehouse/laporan}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-2-img.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Laporan Transaksi</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/transaksi/viewall/semua}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class = "col-md-3 my-3 d-flex align-items-stretch">
+                    <div class = "card rounded-25 text-center">
+                        <img class = "card-img-top rounded-top-25" src = "images/blog-1-img.jpg">
+                        <div class = "card-body d-flex flex-column py-5 text-raisin-black">
+                            <h4 class = "card-title h4">Manajemen User</h4>
+                            <br>
+                            <a type="button" class="mt-auto mx-2 btn btn-primary-green" th:href="@{/manajemen-user/viewall}">
+                                Go to page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!--=============== SCROLLREVEAL ===============-->
+<script th:src="@{/js/scrollreveal.min.js}"></script>
+
+<!--=============== MAIN JS ===============-->
+<script th:src="@{/js/main.js}"></script>
+
+<!--=============== SCROLL UP BUTTON ===============-->
+<script th:src="@{/js/topFunctionBtn.js}"></script>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

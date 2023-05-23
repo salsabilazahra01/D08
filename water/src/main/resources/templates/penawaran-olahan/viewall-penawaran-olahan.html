@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav sec:authorize="hasAuthority('CUSTOMER')" th:replace="fragments/fragment :: navbar('Riwayat Pembelian', '')"></nav>
+<nav sec:authorize="!hasAuthority('CUSTOMER')" th:replace="fragments/fragment :: navbar('Pembelian dan Penjualan', '')"></nav>
+
+<div class="container mt-lg-5">
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="card m-4 p-4 rounded-25">
+        <div class="card-body">
+            <div class="justify-content-center">
+
+                <form th:action="@{/penawaran-hasil-olahan/viewall/} + ${status}" id="searchForm">
+
+                <div class="row">
+                    <!--title-->
+                    <div class="col-8 text-start">
+                        <h2 class="h2 text-start">Daftar Pembelian Hasil Olahan</h2>
+                    </div>
+
+                    <!--button tambah manual-->
+                    <div sec:authorize="!hasAuthority('CUSTOMER')" class="col-4 mt-2 text-end">
+                        <a type = "button" class = "btn-small btn-outline-primary-green h6 text-end"
+                           th:href="@{'/penawaran-hasil-olahan/add'}">
+                            <span class="bi-plus"></span> Tambah Secara Manual
+                        </a>
+                    </div>
+                </div>
+
+                <!--section bar-->
+                <div class="my-3" th:if="${status == -1}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Semua')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 0}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Konfirmasi Perusahaan')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 1}" >
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Konfirmasi Harga')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 2}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Diproses')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 3}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Konfirmasi penerimaan')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 4}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Selesai')"></nav>
+                </div>
+                <div class="my-3" th:if="${status == 5}">
+                    <nav th:replace="fragments/fragment-penawaran-olahan :: navbar('Batal')"></nav>
+                </div>
+
+                <!--list penawaran olahan-->
+                <div th:if="*{listPenawaranOlahan.size()!=0}" class="row" id="semuaPenawaranOlahan">
+                    <br>
+                    <table class="table table-striped text-center align-middle">
+                        <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>ID</th>
+                            <th>Tanggal, Waktu</th>
+                            <th>Harga</th>
+                            <th th:if="${status == -1}">Status</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="penawaranOlahan, iterationStatus : ${listPenawaranOlahan}">
+                            <td th:text="${firstItem} + ${iterationStatus.count} - 1"></td>
+                            <td class="text-center" th:text="${penawaranOlahan.idPenawaranOlahan}"></td>
+                            <td th:text="${#temporals.format(penawaranOlahan.tanggalDibuat, 'dd-MM-yyyy HH:mm')}"></td>
+                            <td th:text="${penawaranOlahan.harga != null} ? 'Rp ' + ${#numbers.formatDecimal(penawaranOlahan.harga, 0, 'POINT', 2, 'COMMA')} : '-'"></td>
+                            <td th:if="${status == -1}">
+                                <div th:if="${penawaranOlahan.status == 0}"><span class="bi bi-hourglass-split"></span> Konfirmasi Perusahaan</div>
+                                <div th:if="${penawaranOlahan.status == 1}"><span class="bi bi-hourglass-split"></span> Konfirmasi Harga</div>
+                                <div th:if="${penawaranOlahan.status == 2}"><span class="bi bi-arrow-repeat"></span> Diproses</div>
+                                <div th:if="${penawaranOlahan.status == 3}"><span class="bi bi-truck"></span> Konfirmasi Penerimaan</div>
+                                <div th:if="${penawaranOlahan.status == 4}"><span class="bi bi-check-circle"></span> Selesai</div>
+                                <div th:if="${penawaranOlahan.status == 5}"><span class="bi bi-file-earmark-x"></span> Batal</div>
+                            </td>
+                            <td>
+                                <a type="button" class="mx-2 btn-small btn-primary-green" th:href="@{/penawaran-hasil-olahan/view/} + ${penawaranOlahan.idPenawaranOlahan}">Detail</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:unless="*{listPenawaranOlahan.size()!=0}">
+                    <h4 class="h4 p-2 text-center">This list is empty</h4>
+                </div>
+                </form>
+
+                <!-- pagination & page size -->
+                <div class="row mt-4 p3">
+                    <div class="col text-start">
+                        <label class="d-inline-block p3" for="pageSize">Show: </label>
+                        <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="form-select form-select-sm d-inline-block" style="width:auto;"
+                                id="pageSize">
+                            <option th:each="s : ${ {5, 10, 15, 20} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                        </select>
+                        <p class="d-inline-block p3" th:text="'Result: ' + ${firstItem} + '-' + ${lastItem} + ' of ' + ${totalItems}"></p>
+                    </div>
+                    <div class="col text-end">
+                        <nav class="d-inline-block" aria-label="Pagination" th:if="${totalPages > 0}">
+                                <ul class="pagination">
+                                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                        <a class="fw-bold" th:replace="fragments/fragment-penawaran-olahan :: paging(${status},${currentPage - 1}, 'Previous', 'Previous Page')"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${1 == currentPage} ? 'active'">
+                                        <a th:replace="fragments/fragment-penawaran-olahan :: paging(${status},1, '1', 'First Page')"></a>
+                                    </li>
+                                    <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                                        <a class="page-link" href="#">...</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                                        th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 1 : 1, currentPage + 2 < totalPages ? currentPage + 1 : totalPages)}">
+                                        <a th:replace="${page != 1 && page != totalPages} ? ~{fragments/fragment-penawaran-olahan :: paging(${status}, ${page}, ${page}, 'Page ' + ${page})} : _"></a>
+                                    </li>
+                                    <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                                        <a class="page-link" href="#">...</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${totalPages == currentPage} ? 'active'">
+                                        <a th:replace="${totalPages != 1} ? ~{fragments/fragment-penawaran-olahan :: paging(${status}, ${totalPages}, ${totalPages}, 'Last Page')} : _"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                        <a class="fw-bold" th:replace="fragments/fragment-penawaran-olahan :: paging(${status}, ${currentPage + 1},'Next', 'Next Page')"></a>
+                                    </li>
+                                </ul>
+                            </nav>
+                    </div>
+                </div>
+                <!-- end pagination & page size -->
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<!-- Table and Pagination Bar -->
+<script type="text/javascript">
+    function changePageSize() {
+        document.getElementById('searchForm').submit()
+    }
+</script>
+
+</body>
+</html>

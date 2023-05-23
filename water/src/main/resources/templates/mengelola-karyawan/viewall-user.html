@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav th:replace="fragments/fragment :: navbar('Manajemen User', '')"></nav>
+
+<div class="container mt-lg-5">
+  <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+  <div class="card rounded-25 m-4 p-4">
+    <div class="card-body">
+      <div class="justify-content-center">
+
+
+        <form th:action="@{/manajemen-user/viewall/} + ${role}" id="searchForm">
+        <br>
+
+        <div class="row">
+          <div class="col text-start">
+            <h2 class="h2">Daftar User</h2>
+          </div>
+          <div class="col text-end">
+            <a button type="button" class="btn-small btn-outline-primary-green h6"
+                    th:if="${role=='semua' or role=='karyawan'}" th:href="@{/manajemen-user/add}">
+              <span class="bi-plus"></span> Tambah Karyawan Baru
+            </a>
+  <!--          <button type = "button" class = "btn-small btn-primary-green h6 mt-4">-->
+  <!--            Filter <span class="bi-filter-right"></span>-->
+  <!--          </button>-->
+          </div>
+        </div>
+
+        <!--section bar-->
+        <div th:if="${#strings.equals(role, 'semua')}">
+          <nav th:replace="fragments/fragment-mengelola-karyawan :: navbar('Semua')"></nav>
+        </div>
+        <div th:if="${#strings.equals(role, 'karyawan')}" >
+          <nav th:replace="fragments/fragment-mengelola-karyawan :: navbar('Karyawan')"></nav>
+        </div>
+        <div th:if="${#strings.equals(role, 'eksternal')}">
+          <nav th:replace="fragments/fragment-mengelola-karyawan :: navbar('Eksternal')"></nav>
+        </div>
+
+        <!--list user-->
+        <div class="section" id="listOfUsers">
+          <br>
+          <div th:if="*{listUser.size()!=0}">
+            <table class="table table-striped text-center align-middle">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Username</th>
+                <th>Nama</th>
+                <th>Posisi</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user, iterationStatus : ${listUser}"
+                th:style="${iterationStatus.even} ? 'font-weight:bold;'"  align="center">
+              <td th:text="${firstItem} + ${iterationStatus.count} - 1"></td>
+              <td th:text="${user.username}"></td>
+              <td th:text="${user.nama}"></td>
+              <td th:text="${user.role}"></td>
+              <td>
+                <a type="button" class="mx-2 btn-small btn-primary-green" th:href="@{/manajemen-user/view/} + ${user.username}">Detail</a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+          <div th:unless="*{listUser.size()!=0}">
+            <h4 class="h4 p-2 text-center">This list is empty</h4>
+          </div>
+        </div>
+        </form>
+
+        <!-- pagination & page size -->
+        <div class="row mt-4 p3">
+          <div class="col text-start">
+            <label class="d-inline-block p3" for="pageSize">Show: </label>
+            <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="form-select form-select-sm d-inline-block" style="width:auto;"
+                    id="pageSize">
+              <option th:each="s : ${ {5, 10, 15, 20} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+            </select>
+            <p class="d-inline-block p3" th:text="'Result: ' + ${firstItem} + '-' + ${lastItem} + ' of ' + ${totalItems}"></p>
+          </div>
+          <div class="col text-end">
+            <nav class="d-inline-block" aria-label="Pagination" th:if="${totalPages > 0}">
+              <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                  <a class="fw-bold" th:replace="fragments/fragment-mengelola-karyawan :: paging(${role},${currentPage - 1}, 'Previous', 'Previous Page')"></a>
+                </li>
+                <li class="page-item" th:classappend="${1 == currentPage} ? 'active'">
+                  <a th:replace="fragments/fragment-mengelola-karyawan :: paging(${role},1, '1', 'First Page')"></a>
+                </li>
+                <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                  <a class="page-link" href="#">...</a>
+                </li>
+                <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                    th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 1 : 1, currentPage + 2 < totalPages ? currentPage + 1 : totalPages)}">
+                  <a th:replace="${page != 1 && page != totalPages} ? ~{fragments/fragment-mengelola-karyawan :: paging(${role}, ${page}, ${page}, 'Page ' + ${page})} : _"></a>
+                </li>
+                <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                  <a class="page-link" href="#">...</a>
+                </li>
+                <li class="page-item" th:classappend="${totalPages == currentPage} ? 'active'">
+                  <a th:replace="${totalPages != 1} ? ~{fragments/fragment-mengelola-karyawan :: paging(${role}, ${totalPages}, ${totalPages}, 'Last Page')} : _"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                  <a class="fw-bold" th:replace="fragments/fragment-mengelola-karyawan :: paging(${role}, ${currentPage + 1},'Next', 'Next Page')"></a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <!-- end pagination & page size -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<!-- Table and Pagination Bar -->
+<script type="text/javascript">
+  function changePageSize() {
+    document.getElementById('searchForm').submit()
+  }
+</script>
+
+</body>
+</html>

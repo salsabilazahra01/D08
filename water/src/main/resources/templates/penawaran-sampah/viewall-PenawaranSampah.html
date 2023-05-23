@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<div sec:authorize="hasAuthority('PARTNER')">
+  <nav th:replace="fragments/fragment :: navbar('Riwayat Penjualan', '')"></nav>
+</div>
+<div sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')">
+  <nav th:replace="fragments/fragment :: navbar('Pembelian dan Penjualan', '')"></nav>
+</div>
+
+<div class="container mt-lg-5">
+  <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+  <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+  <div class="card rounded-25 m-4 p-4">
+    <div class="card-body">
+      <div class="justify-content-center">
+
+
+        <form th:action="@{/penawaran/sampah/viewall/status=} + ${fragmentStatus}" id="searchForm">
+          <br>
+
+          <div class="row">
+            <div class="col-7 text-start">
+              <h2 class="h2">Daftar Penawaran Sampah</h2>
+            </div>
+            <div class="col text-end">
+              <a button
+                 type="button" class="btn-small btn-outline-primary-green h6"
+                 th:href="@{/penawaran/sampah/add}">
+                <span class="bi-plus"></span> Buat Penawaran Sampah Baru
+              </a>
+            </div>
+          </div>
+
+          <!--section bar-->
+          <div th:if="${fragmentStatus == 88}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Semua')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == 0}" >
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Menunggu Persetujuan')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == 1}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Disetujui')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == 2}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Dalam Perjalanan')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == 3}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Dalam Proses Inspeksi')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == 4}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Selesai')"></nav>
+          </div>
+          <div th:if="${fragmentStatus == -1}">
+            <nav th:replace="fragments/fragment-penawaranSampah :: navbar('Ditolak')"></nav>
+          </div>
+
+          <!--list penawaran sampah-->
+          <div class="section" id="listofPenawaranSampah">
+            <br>
+            <div th:if="*{listPenawaranSampah.size()!=0}">
+              <table class="table table-striped text-center align-middle">
+                <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>ID Penawaran Sampah</th>
+                  <th>Tanggal</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="penawaranSampah, iterationStatus : ${listPenawaranSampah}">
+                  <td th:text="${firstItem} + ${iterationStatus.count} - 1"></td>
+                  <td th:text="${penawaranSampah.idPenawaranSampah}"></td>
+                  <td th:text="${#temporals.format(penawaranSampah.tanggalDibuat, 'dd-MM-yyyy HH:mm')}"></td>
+                  <td>
+                    <div th:if="${penawaranSampah.status == -1}"><span class="bi bi-file-earmark-x"></span> <STRONG>Ditolak</STRONG></div>
+                    <div th:if="${penawaranSampah.status == 0}"><span class="bi bi-hourglass-split"></span><STRONG> Menunggu Persetujuan</STRONG></div>
+                    <div th:if="${penawaranSampah.status == 1}"><span class="bi bi-file-earmark-check"></span> <STRONG>Disetujui</STRONG></div>
+                    <div th:if="${penawaranSampah.status == 2}"><span class="bi bi-truck"></span> <STRONG>Dalam Perjalanan</STRONG></div>
+                    <div th:if="${penawaranSampah.status == 3}"><span class="bi bi-search"></span><STRONG> Dalam Proses Inspeksi</STRONG></div>
+                    <div th:if="${penawaranSampah.status == 4}"><span class="bi bi-check-circle"></span> <STRONG>Selesai</STRONG></div>
+                  </td>
+                  <td>
+                    <a type="button" class="mx-2 btn-small btn-primary-green" th:href="@{/penawaran/sampah/view/} + ${penawaranSampah.idPenawaranSampah}">Detail</a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div th:unless="*{listPenawaranSampah.size()!=0}">
+              <h4 class="h4 p-2 text-center">This list is empty</h4>
+            </div>
+          </div>
+        </form>
+        <!-- pagination & page size -->
+        <div class="row mt-4 p3">
+          <div class="col text-start">
+            <label class="d-inline-block p3" for="pageSize">Show: </label>
+            <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="form-select form-select-sm d-inline-block" style="width:auto;"
+                    id="pageSize">
+              <option th:each="s : ${ {5, 10, 15, 20} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+            </select>
+            <p class="d-inline-block p3" th:text="'Result: ' + ${firstItem} + '-' + ${lastItem} + ' of ' + ${totalItems}"></p>
+          </div>
+          <div class="col text-end">
+            <nav class="d-inline-block" aria-label="Pagination" th:if="${totalPages > 0}">
+              <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                  <a class="fw-bold" th:replace="fragments/fragment-penawaranSampah :: paging(${status},${currentPage - 1}, 'Previous', 'Previous Page')"></a>
+                </li>
+                <li class="page-item" th:classappend="${1 == currentPage} ? 'active'">
+                  <a th:replace="fragments/fragment-penawaranSampah :: paging(${status},1, '1', 'First Page')"></a>
+                </li>
+                <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                  <a class="page-link" href="#">...</a>
+                </li>
+                <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                    th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 1 : 1, currentPage + 2 < totalPages ? currentPage + 1 : totalPages)}">
+                  <a th:replace="${page != 1 && page != totalPages} ? ~{fragments/fragment-penawaranSampah :: paging(${status}, ${page}, ${page}, 'Page ' + ${page})} : _"></a>
+                </li>
+                <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                  <a class="page-link" href="#">...</a>
+                </li>
+                <li class="page-item" th:classappend="${totalPages == currentPage} ? 'active'">
+                  <a th:replace="${totalPages != 1} ? ~{fragments/fragment-penawaranSampah :: paging(${status}, ${totalPages}, ${totalPages}, 'Last Page')} : _"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                  <a class="fw-bold" th:replace="fragments/fragment-penawaranSampah :: paging(${status}, ${currentPage + 1},'Next', 'Next Page')"></a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+
+
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+<!-- Table and Pagination Bar -->
+<script type="text/javascript">
+  function changePageSize() {
+    document.getElementById('searchForm').submit()
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('About Us', ${poin})"></nav>
+<nav sec:authorize="!hasAuthority('DONATUR') || !isAuthenticated()" th:replace="fragments/fragment :: navbar('About Us', '')"></nav>
+
+<section id="sec-tentang-kami" class = "p-5 text-raisin-black">
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="row mt-3">
+        <div class="col text-start">
+            <h1 class="h1">Tentang Kami</h1>
+        </div>
+
+        <div class="col text-end">
+            <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER')" type = "button" class = "btn btn-about-us h5 mt-4" th:href="@{/about-us/update}">
+                <span class="bi-pencil"></span> Edit Company Profile
+            </a>
+        </div>
+    </div>
+    <div class = "row">
+        <div class = "col-lg-6 p-5">
+            <img src = "/images/tentang-kita.jpg" class = "img-fluid rounded-25">
+        </div>
+        <div class = "col-lg-6 p-5 text-center text-lg-start">
+            <h2 th:text="${companyProfile.namaPerusahaan}"></h2>
+            <text th:text="${companyProfile.deskripsiPerusahaan}" class = "p2 my-5 lead"></text>
+        </div>
+    </div>
+</section>
+
+<section id="sec-visi-misi" class = "p-5 text-raisin-black">
+    <div class = "row mb-5">
+        <div class = "col text-center">
+            <h1 class = "mb-4 h1">Visi & Misi Perusahaan</h1>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Visi</h2>
+                            <text th:text="${companyProfile.visiPerusahaan}" class = "pt-2 w-75 mx-auto p2 text-start"></text>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Misi</h2>
+                            <text th:text="${companyProfile.misiPerusahaan}" class = "pt-2 w-75 mx-auto p2 text-start"></text>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

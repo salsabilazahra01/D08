@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Artikel', ${poin})"></nav>
+<nav sec:authorize="!hasAuthority('DONATUR') || !isAuthenticated()" th:replace="fragments/fragment :: navbar('Artikel', '')"></nav>
+
+<div class="card card-wr text-center mt-4">
+    <div class="card-body">
+        <div class="justify-content-center">
+            <strong class="h1 text-white">ARTIKEL</strong>
+        </div>
+    </div>
+</div>
+<div class="container mt-lg-5">
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+    <div class="row">
+        <div class="col-12 ">
+            <a sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+               class="btn btn-small btn-primary-green float-end float-md-end"
+               th:href="@{/artikel/add/}">
+                <span class="bi bi-plus fs-6"></span>
+                Tambah Artikel Baru
+            </a>
+        </div>
+    </div>
+
+
+    <!--list artikel-->
+    <div class="section" id="listArtikel">
+        <br>
+        <div class="row" th:if="*{listArtikel.size()!=0}">
+            <!--                            <div th:each="artikel, iterationStatus : ${listArtikel}"></div>-->
+            <!--Card Artikel-->
+            <div class="col-lg-4 mb-3 d-flex align-items-stretch" th:each="artikel, iterationStatus : ${listArtikel}">
+                <div class="w-100 ">
+                    <div class="card rounded-25 h-100">
+                        <!--                                <span class="card-img-top" th:src="${artikel.imageTitle}" >-->
+                        <img class="card-img-top rounded-top-25" th:src="'/images/'+${artikel.idArtikel}+'/'+${artikel.imageTitle}"
+                             alt="Artikel Image">
+                        <div class="card-body">
+                            <div class="card-title h5" th:text="${artikel.title}"></div>
+                            <p class="card-text " th:utext="${artikel.subtitle}"></p>
+                        </div>
+                        <div class="footer ui-corner-right d-flex justify-content-end">
+                            <a type="button" class="m-2 btn-small btn-primary-green ml-auto"
+                               th:href="@{/artikel/view/} + ${artikel.idArtikel}">Lihat Artikel</a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+        <div th:unless="*{listArtikel.size()!=0}">
+            <h4 class="h4 p-2 text-center">Artikel Tidak Tersedia</h4>
+        </div>
+
+    </div>
+
+
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+
+</body>
+</html>

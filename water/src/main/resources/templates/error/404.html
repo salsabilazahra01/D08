@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<main class="main">
+    <!--==================== HOME ====================-->
+    <section class="err">
+        <div class="error__container container">
+            <div class="error__data">
+                <span class="h1">404 Not Found</span>
+                <h1 class="h-error">Oops, sorry!</h1>
+                <p class="p1">
+                    Looks like you're lost
+                </p>
+                <a class="btn-outline-raisin-black btn" th:href="@{/}" >
+                    Kembali ke Home
+                </a>
+            </div>
+
+            <div class="error__img">
+                <img th:src="@{/images/ghost-error-img.png}" alt="">
+                <div class="error__shadow"></div>
+            </div>
+
+        </div>
+
+<!--        <footer th:replace="fragments/fragment :: footer"></footer>-->
+    </section>
+</main>
+
+<!--=============== SCROLLREVEAL ===============-->
+<script th:src="@{/js/scrollreveal.min.js}"></script>
+
+<!--=============== MAIN JS ===============-->
+<script th:src="@{/js/main.js}"></script>
+<script src = "/bootstrap/js/bootstrap.js"></script>
+
+<script src="/script.js"></script>
+</body>
+
+</html>

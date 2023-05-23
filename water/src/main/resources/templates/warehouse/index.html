@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" th:with="pageTitle='Water'">
+<head th:replace="fragments/head :: head"></head>
+<body>
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<header class="mt-5">
+  <h2 class="h1 text-center">Warehouse</h2>
+</header>
+<section class="container-fluid">
+  <table class="table table-striped">
+    <thead>
+      <tr class="text-center">
+        <th colspan="2">Item Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Tools</th>
+      </tr>
+    </thead>
+    <tbody>
+      <th:block th:each="category : ${categories}">
+        <tr>
+          <td class="bg-secondary align-middle text-center" th:rowspan="${category.listWarehouse.size() + 2}" th:text="${category.namaJenisItem}"></td>
+        </tr>
+        <tr></tr>
+        <tr th:each="item : ${category.listWarehouse}">
+          <td th:text="${item.namaItem}"></td>
+          <td th:text="${item.kuantitasSampah}"></td>
+          <td th:text="${item.hargaBeli}"></td>
+          <td>
+            <a class="btn btn-primary btn-sm" th:href="@{/warehouse/update/{id}(id=${item.idItem})}">Update</a>
+            <a class="btn btn-danger btn-sm" th:href="@{/warehouse/delete/{id}(id=${item.idItem})}" th:disabled="${category.listWarehouse.size() == 1}">Delete</a>
+          </td>
+        </tr>
+      </th:block>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-center">
+    <a th:href="@{/warehouse/add}" class="btn btn-primary-green">
+      <i class="bi bi-plus"></i> Tambah Jenis Sampah Baru
+    </a>
+  </div>
+</section>
+
+
+<th:block th:include="fragments/scripts :: scripts"></th:block>
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+</body>
+</html>

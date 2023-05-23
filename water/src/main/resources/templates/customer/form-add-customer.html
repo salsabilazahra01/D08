@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav th:replace="fragments/fragment :: navbar('', '')"></nav>
+
+<section class="vh-100">
+  <div class="container-fluid">
+    <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+    <div class="row">
+      <div class="col-sm-6 px-0 d-none d-sm-block">
+        <img src="/images/blog-2-img.jpg"
+             alt="Login image" class="w-100 vh-100" style="object-fit: cover; object-position: left;">
+      </div>
+      <div class="col-sm-6 text-black">
+
+        <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 mt-5 pt-5 pt-xl-0 mt-xl-n5">
+
+          <form style="width: 40rem;" th:action="@{/customer/add}" th:object="${customer}" method="POST">
+
+            <h3 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Daftar Sebagai Customer</h3>
+
+            <div class="form-outline mb-4">
+              <label class="form-label" for="form2Example18">Username:</label>
+              <input type="text" id="form2Example18" class="form-control form-control-lg" name="username" th:field="*{username}" required="required"/>
+            </div>
+
+            <div class="row">
+              <div class="col">
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form2Example182">Nama:</label>
+                  <input type="text" id="form2Example182" class="form-control form-control-lg" name="nama" th:field="*{nama}" required="required"/>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form2Example1826">Nama PIC:</label>
+                  <input type="text" id="form2Example1826" class="form-control form-control-lg" name="nama_pic" th:field="*{namaPic}" required="required"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-outline mb-4">
+              <label class="form-label" for="form2Example2834">Alamat:</label>
+              <input type="text" id="form2Example2834" class="form-control form-control-lg" name="alamat" th:field="*{alamat}" required="required"/>
+            </div>
+
+            <div class="row">
+              <div class="col">
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form2Example28324">Password:</label>
+                  <input type="password" id="form2Example28324" class="form-control form-control-lg" name="password" pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$" title="Password harus mengandung minimal 8 karakter & angka, huruf besar, huruf kecil, dan simbol." th:field="*{password}"/>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="passwordConfirmer">Konfirmasi Password:</label>
+                  <input type="password" id="passwordConfirmer" class="form-control form-control-lg" name="passwordConfirmer" required="required"/>
+                </div>
+              </div>
+            </div>
+
+            <fieldset>
+              <legend>Fill at least one field to continue:</legend>
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example283">E-mail:</label>
+                <input type="email" id="form2Example283" class="form-control form-control-lg" name="email" th:field="*{email}"/>
+              </div>
+
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example283">No. HP:</label>
+                <input type="number" id="form2Example2831" class="form-control form-control-lg" name="hp" th:field="*{hp}"/>
+              </div>
+            </fieldset>
+
+            <div class="pt-1 mb-4">
+              <button class="btn btn-primary-green mx-2" type="submit">Submit</button>
+            </div>
+
+            <!--            <p class="small mb-5 pb-lg-2"><a class="text-muted" href="#!">Forgot password?</a></p>-->
+            <p>Sudah memiliki akun? <a class="link-primary" th:href="@{/login}">Login</a></p>
+
+          </form>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--<div class="container">-->
+<!--  <div class="card m-4 p-4">-->
+<!--    <div class="card-body">-->
+<!--      <div class="justify-content-center">-->
+<!--        <h2>Tambah Customer Baru</h2>-->
+<!--        <br>-->
+<!--        <form th:action="@{/customer/add}" th:object="${customer}" method="POST">-->
+
+<!--          <label>Username</label>-->
+<!--          <input type="text" class="form-control" required="required" name="username" th:field="*{username}"/>-->
+
+<!--          <label>Nama</label>-->
+<!--          <input type="text" name="nama" class="form-control" required="required" th:field="*{nama}"/>-->
+
+<!--          <label>Nama PIC</label>-->
+<!--          <input type="text" class="form-control" required="required" name="nama_pic" th:field="*{namaPic}"/>-->
+
+<!--          <label>E-mail atau No. HP</label>-->
+<!--          <input type="text" class="form-control" required="required" name="email_hp" th:field="*{emailHp}"/>-->
+
+<!--          <label>Alamat</label>-->
+<!--          <input type="text" class="form-control" required="required" name="alamat" th:field="*{alamat}"/>-->
+
+<!--          <label>Password</label>-->
+<!--          <input required type="password" name="password" class="form-control" pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$" title="Password harus mengandung minimal 8 karakter & angka, huruf besar, huruf kecil, dan simbol." th:field="*{password}"/>-->
+
+<!--          <label>Konfirmasi Password</label>-->
+<!--          <input type="password"  id="passwordConfirmer" name="passwordConfirmer" class="form-control"/>-->
+
+<!--          <br>-->
+<!--          <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--          <a class="btn btn-link" href="/home">Home</a>-->
+<!--        </form>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

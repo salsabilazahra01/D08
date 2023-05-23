@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Water</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel = "stylesheet" href = "bootstrap/css/bootstrap.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<nav th:fragment="navbar(activeLink)" class="navbar navbar-expand-lg navbar-light text-center">
+    <div id="navbarsExampleDefault">
+        <ul class="navbar-nav">
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Semua')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall}">Semua<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Menunggu Persetujuan')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=0}">Menunggu Persetujuan<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Disetujui')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=1}">Disetujui<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Dalam Perjalanan')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=2}">Dalam Perjalanan<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Dalam Proses Inspeksi')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=3}">Dalam Proses Inspeksi<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Selesai')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=4}">Selesai<span class="sr-only">(current)</span></a>
+            </li>
+            <li>
+                <a th:class="${#strings.equals(activeLink, 'Ditolak')}  ? 'nav-link nav-underline active' : 'nav-link'" th:href="@{/penawaran/sampah/viewall/status=-1}">Batal<span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<a th:fragment="paging(status, pageNum, label, tooltip)" class="page-link"
+   th:href="@{'/penawaran/sampah/viewall/status=' + ${fragmentStatus} + '?' + 'page=' + ${pageNum} + '&size=' + ${pageSize}}"
+   th:title="${tooltip}" rel="tooltip">
+    [[${label}]]
+</a>
+
+<script src = "bootstrap/js/bootstrap.js"></script>
+<script src="script.js"></script>
+
+</body>
+
+
+</html>

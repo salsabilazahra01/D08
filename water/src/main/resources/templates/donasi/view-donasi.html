@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<div sec:authorize="hasAuthority('DONATUR')">
+  <nav th:replace="fragments/fragment :: navbar('Riwayat Donasi', ${poin})"></nav>
+</div>
+<div sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER')">
+  <nav th:replace="fragments/fragment :: navbar('Donasi Sampah', ${poin})"></nav>
+</div>
+
+<div class="d-flex justify-content-center">
+
+  <div class="container my-5">
+
+    <!-- alert -->
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+    <!-- button & id -->
+    <div class="row my-3">
+      <p class="c3">
+        <a type="button" class="btn-small btn-outline-raisin-black h6 me-4" th:href="@{/donasi/viewall}">
+          <i class="bi-chevron-left"></i>
+          Back
+        </a>
+        <text th:text="${donasi.idDonasi}" class="c3"></text>
+      </p>
+    </div>
+
+    <!-- title -->
+    <div class="row mt-3 mb-4">
+      <div class="col-sm-6 w-auto justify-content-start pr-0">
+        <h2 class="h2">Detail Donasi Sampah</h2>
+      </div>
+      <div class="col-sm-3 w-auto px-0 mx-0 ms-2" sec:authorize="hasAuthority('DONATUR')" th:if="${donasi.status == 0}">
+        <a type="button" class="btn-small-fit btn-primary-green h6" th:href="@{/donasi/update/} + ${donasi.idDonasi}">
+          <i class="bi bi-pencil-fill"></i>
+             Edit
+        </a>
+      </div>
+      <div class="col-sm-3 w-auto px-0 mx-0" sec:authorize="hasAuthority('DONATUR')" th:if="${donasi.status == 0}">
+        <button type="button" class="btn-small-fit btn-red-danger h6"  data-bs-toggle="modal" data-bs-target="#deleteDonasi">
+          <i class="bi bi-x-circle-fill"></i>
+            Batalkan
+        </button>
+
+        <!-- modal -->
+        <div class="modal fade" id="deleteDonasi" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+              <div class="modal-header text-center">
+                <h6 class="modal-title h6">Batalkan</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menghapus donasi dengan ID ' + ${donasi.idDonasi} + ' ?'"></div>
+              <div class="modal-footer justify-content-center">
+                <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                <a type="button" class="btn-small btn-red-danger" th:href="@{/donasi/delete/} + ${donasi.idDonasi}">Ya, hapus</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--end modal-->
+
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- detail card left column -->
+      <div class="col">
+        <div class="card rounded-25 shadow-sm m-2 p-2">
+          <div class="card-body">
+            <div class="row">
+
+              <div class="col px-5">
+                <div class="mb-5 mt-3">
+                  <p2 class="p2">ID Donasi</p2>
+                  <h4 class="h4" th:text="${donasi.idDonasi}"></h4>
+                </div>
+                <div class="my-5" sec:authorize="!hasAuthority('DONATUR')">
+                  <p2 class="p2">Nama Pengguna</p2>
+                  <h4>
+                    <a class="h4" th:text="${donasi.donatur.username}" th:href="@{/manajemen-user/view/} + ${donasi.donatur.username}"></a>
+                  </h4>
+                </div>
+                <div class="my-5">
+                  <p2 class="p2">Nama Donatur</p2>
+                  <h4 class="h4" th:text="${donasi.namaPic}"></h4>
+                </div>
+                <div class="my-5">
+                  <p2 class="p2">Kontak Donatur</p2>
+                  <h4 class="h4" th:text="${donasi.kontakPic}"></h4>
+                </div>
+                <div class="my-5">
+                  <p2 class="p2">Tanggal, Waktu Donasi</p2>
+                  <h4 class="h4" th:text="${#temporals.format(donasi.tanggalDibuat, 'dd-MM-yyyy HH:mm')}"></h4>
+                </div>
+                <div class="my-5">
+                  <p2 class="p2">Pilihan Pengiriman</p2>
+                  <h4 class="h4" th:text="${donasi.isPickedUp} ? 'Diambil Oleh Perusahaan' : 'Dikirim Donatur'">
+                  </h4>
+                </div>
+                <div class="my-5">
+                  <p2 class="p2">Status</p2>
+                  <h4 class="h4">
+                    <div th:if="${donasi.status == -1}"><span class="bi bi-file-earmark-x"></span> Donasi Batal</div>
+                    <div th:if="${donasi.status == 0}"><span class="bi bi-hourglass-split"></span> Menunggu Persetujuan</div>
+                    <div th:if="${donasi.status == 1}"><span class="bi bi-file-earmark-check"></span> Donasi Disetujui</div>
+                    <div th:if="${donasi.status == 2}"><span class="bi bi-truck"></span> Dalam Perjalanan</div>
+                    <div th:if="${donasi.status == 3}"><span class="bi bi-search"></span> Dalam Proses Inspeksi</div>
+                    <div th:if="${donasi.status == 4}"><span class="bi bi-check-circle"></span> Selesai</div>
+                  </h4>
+                </div>
+                <div class="my-5" th:if="${donasi.status == -1}">
+                  <p2 class="p2">Alasan Penolakan</p2>
+                  <h4 class="h4" th:if="${donasi.keterangan!=null or donasi.keterangan!=('')}" th:text="${donasi.keterangan}"></h4>
+                  <h4 class="h4" th:unless="${donasi.keterangan!=null or donasi.keterangan!=('')}">-</h4>
+                </div>
+              </div>
+
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- donasi item detail right column -->
+      <div class="col">
+        <div th:if="${donasi.status == 4}">
+          <div class="card rounded-25 shadow-sm m-2 p-2">
+            <div class="card-body text-center">
+              <div>
+                <p2 class="p2">Poin diterima</p2>
+                <h4 class="h4" th:if="${donasi.status == 4}" th:text="${donasi.poinEarned}"></h4>
+                <h4 class="h4" th:unless="${donasi.status == 4}">-</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+<!--        <p2>Jenis dan Berat Sampah Didonasikan</p2>-->
+        <div class="row">
+          <div class="col">
+            <!-- list jenis sampah -->
+            <div class="card rounded-25 shadow-sm m-2 p-2">
+              <div class="card-body text-center">
+                <h5 class="h5 card-title">Jenis Sampah</h5>
+
+                <div th:if="*{donasi.listItemDonasi.size()!=0}">
+                  <table class="table text-center align-middle">
+                    <thead>
+                    </thead>
+                    <tbody>
+                    <tr th:each="jenisItemDonasi, iterationStatus : ${donasi.listItemDonasi}" align="center">
+                      <td th:text="${jenisItemDonasi.idItem.namaItem}"></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div th:unless="*{donasi.listItemDonasi.size()!=0}" class="text-center">
+                  <p2 class="p2">-</p2>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <!-- estimasi berat -->
+            <div class="card rounded-25 shadow-sm m-2 p-2">
+              <div class="card-body text-center">
+                <h5 class="h5 card-title">Estimasi Berat (kg)</h5>
+                <p2 class="p2" th:text="${donasi.beratSebelum} + 'kg'"></p2>
+              </div>
+            </div>
+
+            <!-- berat diterima -->
+            <div class="card rounded-25 shadow-sm m-2 p-2">
+              <div class="card-body text-center">
+                <h5 class="h5 card-title">Berat Diterima (kg)</h5>
+                <p2 class="p2" th:if="${donasi.status == 4}" th:text="${donasi.beratSetelah} + 'kg'"></p2>
+                <p2 class="p2" th:unless="${donasi.status == 4}">-</p2>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- setujui donasi -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')"
+             th:if="${donasi.status == 0}" type = "button" class = "btn btn-primary-green h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#setujuiDonasi">Setujui Donasi</a>
+        </div>
+        <!-- tolak donasi -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')"
+             th:if="${donasi.status == 0}" type = "button" class = "btn btn-red-danger h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#tolakDonasi">Tolak Donasi</a>
+        </div>
+
+        <!-- dikirimkan oleh donatur -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('DONATUR')"
+             th:if="${donasi.status == 1 and !donasi.isPickedUp}" type = "button" class = "btn btn-primary-green h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#dikirimDonatur">Konfirmasi Pengiriman Donasi</a>
+        </div>
+        <!-- diambil perusahaan -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')"
+             th:if="${donasi.status == 1 and donasi.isPickedUp}" type = "button" class = "btn btn-primary-green h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#diambilPerusahaan">Konfirmasi Pengambilan Donasi</a>
+        </div>
+
+        <!-- inspeksi -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')"
+             th:if="${donasi.status == 2}" type = "button" class = "btn btn-primary-green h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#inspeksi">Konfirmasi Penerimaan Donasi</a>
+        </div>
+
+        <!-- selesai -->
+        <div class="row">
+          <a sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')"
+             th:if="${donasi.status == 3}" type = "button" class = "btn btn-primary-green h6 d-block"
+             data-bs-toggle="modal" data-bs-target="#selesai">Konfirmasi Inspeksi Selesai</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS UPDATE MODALS -->
+
+<!-- Modal Setujui -->
+<div class="modal fade" id="setujuiDonasi" tabindex="-1" aria-labelledby="setujuiDonasiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="setujuiDonasiLabel">Setujui Pembelian Hasil Olahan</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menyetujui donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Status akan berubah menjadi 'Disetujui' setelah Anda klik setuju</div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <a type="button" class="btn-small btn-primary-green" th:href="@{/donasi/update-status/} + ${donasi.idDonasi}">Ya, setujui</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Modal Tolak -->
+<div class="modal fade" id="tolakDonasi" tabindex="-1" aria-labelledby="tolakDonasiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="tolakDonasiLabel">Tolak Donasi</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menolak donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Status akan berubah menjadi 'Ditolak' setelah Anda klik setuju</div>
+      <form class="m-1 p-2" th:action="@{/donasi/update-status2/} + ${donasi.idDonasi} + '?isApproved=false'"
+            th:object="${donasi}" method="POST">
+        <input type="hidden" th:field="*{donatur}"/>
+        <input type="hidden" th:field="*{idDonasi}"/>
+        <input type="hidden" th:field="*{namaPic}"/>
+        <input type="hidden" th:field="*{kontakPic}"/>
+        <input type="hidden" th:field="*{alamatPic}"/>
+        <input type="hidden" th:field="*{isPickedUp}"/>
+        <input type="hidden" th:field="*{tanggalDibuat}"/>
+        <input type="hidden" th:field="*{status}"/>
+        <input type="hidden" th:field="*{beratSebelum}"/>
+        <input type="hidden" th:field="*{beratSetelah}"/>
+        <input type="hidden" th:field="*{poinEarned}"/>
+        <label class="h6 text-raisin-black text-start">Keterangan<span class="text-danger"> *</span></label>
+        <textarea required class="form-control p3" th:field="*{keterangan}"></textarea>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn-small btn-red-danger">Ya, tolak</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Modal DIkirim -->
+<div class="modal fade" id="dikirimDonatur" tabindex="-1" aria-labelledby="dikirimDonaturLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="dikirimDonaturLabel">Konfirmasi Pengiriman</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin mengonfirmasi pengiriman donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Status akan berubah menjadi 'Dalam Perjalanan' setelah Anda klik setuju</div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <a type="button" class="btn-small btn-primary-green" th:href="@{/donasi/update-status/} + ${donasi.idDonasi}">Ya, setujui</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Modal Diambil -->
+<div class="modal fade" id="diambilPerusahaan" tabindex="-1" aria-labelledby="diambilPerusahaanLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="diambilPerusahaanLabel">Konfirmasi Pengambilan</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin mengonfirmasi pengambilan donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Status akan berubah menjadi 'Dalam Perjalanan' setelah Anda klik setuju</div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <a type="button" class="btn-small btn-primary-green" th:href="@{/donasi/update-status/} + ${donasi.idDonasi}">Ya, setujui</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Modal Inspeksi -->
+<div class="modal fade" id="inspeksi" tabindex="-1" aria-labelledby="inspeksiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="inspeksiLabel">Konfirmasi Penerimaan</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin mengonfirmasi penerimaan donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Status akan berubah menjadi 'Dalam Proses Inspeksi' setelah Anda klik setuju</div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <a type="button" class="btn-small btn-primary-green" th:href="@{/donasi/update-status/} + ${donasi.idDonasi}">Ya, setujui</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Modal Zelezai -->
+<div class="modal fade" id="selesai" tabindex="-1" aria-labelledby="selesaiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered text-center justify-content-center rounded-25">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title h6" id="selesaiLabel">Konfirmasi Inspeksi Selesai</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p3" th:text="'Apakah Anda yakin ingin mengonfirmasi penyelesaian inspeksi donasi dengan ID ' + ${donasi.idDonasi} + '?'"></div>
+      <div class="modal-body p3">Anda akan diarahkan ke halaman input hasil inspeksi setelah Anda klik setuju</div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+        <a type="button" class="btn-small btn-primary-green" th:href="@{/donasi/update-status/} + ${donasi.idDonasi} + @{/inspeksi}">Ya, setujui</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Riwayat Donasi', ${poin})"></nav>
+
+<div class="d-flex justify-content-center">
+  <div class = "container my-5">
+
+    <!-- alert -->
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+    <!-- back button -->
+    <div class = "row my-3">
+      <p class="c3">
+        <a type="button" class = "btn-small btn-outline-raisin-black h6 me-4" th:href="@{/donasi/view/} + ${donasi.idDonasi}">
+          <i class="bi-chevron-left"></i>
+          Back
+        </a>
+        <text th:text="${donasi.idDonasi}" class="c3"></text>
+      </p>
+    </div>
+
+    <!-- title -->
+    <div class = "row mt-3 mb-4">
+      <h2 class = "h2">Edit Donasi</h2>
+    </div>
+
+    <!-- form -->
+    <form th:action="@{/donasi/update}" th:object="${donasi}" method="POST">
+      <input type="hidden" th:field="*{donatur}"/>
+      <input type="hidden" th:field="*{idDonasi}"/>
+      <input type="hidden" th:field="*{tanggalDibuat}"/>
+      <input type="hidden" th:field="*{status}"/>
+      <input type="hidden" th:field="*{beratSetelah}"/>
+      <input type="hidden" th:field="*{poinEarned}"/>
+      <input type="hidden" th:field="*{keterangan}"/>
+      <div class="container my-2">
+        <div class = "card rounded-25">
+          <div class="card-body">
+            <div class="row">
+              <!-- left column -->
+              <div class="col px-5">
+                <div class="row gy-4 my-2">
+                  <div class="form-group">
+                    <label class="h5 text-raisin-black">Nama Donatur<span class="text-danger"> *</span></label>
+                    <input required type="text" autocomplete="off" class="form-control p2" th:field="*{namaPic}">
+                    <div class="invalid-feedback">
+                      Masukkan nama donatur
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="h5 text-raisin-black">Nomor Telepon Donatur<span class="text-danger"> *</span></label>
+                    <input required type="number" autocomplete="off" class="form-control p2" th:field="*{kontakPic}">
+                    <div class="invalid-feedback">
+                      Masukkan nomor telepon donatur yang dapat dihubungi
+                    </div>
+                  </div>
+
+                  <div class="row mb-0 mt-4 gy-1">
+                    <label class="h5 text-raisin-black">Pengiriman<span class="text-danger"> *</span></label>
+                    <div class="form-group">
+                      <div class="form-check form-check-inline">
+                        <input required class="form-check-input" type="radio" name="jenis" id="dikirimkan" value="0" th:field="*{isPickedUp}">
+                        <label class="form-check-label" for="dikirimkan"> Dikirim sendiri </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input required class="form-check-input" type="radio" name="jenis" id="diambil" value="1" th:field="*{isPickedUp}">
+                        <label class="form-check-label" for="diambil"> Diambil oleh perusahaan </label>
+                      </div>
+                      <div class="invalid-feedback">
+                        Pilih jenis pengiriman
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="h5 text-raisin-black">Alamat<span class="text-danger"> *</span></label>
+                    <input required type="text" autocomplete="off" class="form-control p2" th:field="*{alamatPic}">
+                    <div class="invalid-feedback">
+                      Masukkan alamat pick-up sampah
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- right column-->
+              <div class="col px-5">
+                <div class="row gy-4 my-2">
+                  <div class="form-group">
+                    <label class="h5 text-raisin-black">Estimasi Berat<span class="text-danger"> *</span></label>
+                    <input required type="number" autocomplete="off" class="form-control p2" th:field="*{beratSebelum}" max="10">
+                    <div class="invalid-feedback">
+                      Masukkan estimasi berat sampah
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="h5">Jenis Sampah</label>
+                    <table class="table" style="width:100%;">
+                      <thead></thead>
+                      <tbody>
+                      <tr th:each="itemDonasi, iterationStatus: ${donasi.getListItemDonasi()}">
+                        <td class="col-11">
+                          <select class="form-select"
+                                  name="itemDonasi" th:field="*{listItemDonasi[__${iterationStatus.index}__].idItem}">
+                            <div th:each="itemWarehouse, iterationStatus2 : ${listItemWarehouse}">
+                              <option th:value="${itemWarehouse.idItem}" th:text="${itemWarehouse.namaItem}"></option>
+                            </div>
+                          </select>
+                        </td>
+                        <td class="col-1">
+                          <button th:value="${iterationStatus.index}" class="btn-delete btn-danger" type="submit" name="deleteRow">
+                            <i class="bi bi-dash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                    <div th:if="${listItemWarehouse.size() > 0 and donasi.listItemDonasi.size() < listItemWarehouse.size()}">
+                      <button class="btn-small btn-add-row w-100" type="submit" name="addRow">Tambah Jenis Baru
+                        <i class="bi bi-plus text-end"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- submit button -->
+            <div class="row d-flex justify-content-end text-end">
+              <div class="col-sm-1 w-auto justify-content-end px-0">
+                <!-- Button trigger modal save change -->
+                <a type="button" class="mx-2 btn-small btn-outline-red-danger" data-bs-toggle="modal" data-bs-target="#cancel">
+                  Cancel
+                </a>
+
+                <!-- Modal -->
+                <div class="modal fade" id="cancel" tabindex="-1" aria-labelledby="discard-changes" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h6 class="modal-title h6" id="discard-changes">Discard Changes</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body p3">
+                        Apakah Anda yakin ingin membatalkan perubahan ini?
+                      </div>
+                      <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Keep editing</button>
+                        <a type="button" th:href="@{/donasi/view/} + ${donasi.idDonasi}" class="btn-small btn-red-danger">Discard changes</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- end modal -->
+
+              </div>
+              <div class="col-sm-1 w-auto justify-content-end pl-0">
+
+                <!-- Button trigger modal save changes -->
+                <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal" data-bs-target="#save">
+                  Save Changes
+                </a>
+
+                <!-- Modal save changes-->
+                <div class="modal fade" id="save" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h6 class="modal-title h6" id="exampleModalLabel">Edit Donasi</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body p3">
+                        Apakah Anda yakin ingin menyimpan perubahan ini?
+                      </div>
+                      <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="save" id="submitbutton" class="btn-small btn-primary-green">Ya, simpan</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- end modal save changes-->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<script>
+  // Example starter JavaScript for disabling form submissions if there are invalid fields
+  (function () {
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+              form.addEventListener('submit', function (event) {
+
+                if (!form.checkValidity()) {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  $("#save").modal("hide")
+                }
+                form.classList.add('was-validated')
+              }, false)
+            })
+  })()
+</script>
+
+</body>
+</html>

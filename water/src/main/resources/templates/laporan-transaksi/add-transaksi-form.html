@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<div class="d-flex justify-content-center">
+    <div class = "container my-5">
+
+        <!-- back button -->
+        <div class = "row my-3">
+            <p class="c3">
+                <a type="button" class = "btn-small btn-outline-raisin-black h6 me-4" th:href="@{/transaksi/viewall/semua}">
+                    <i class="bi-chevron-left"></i>
+                    Back
+                </a>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class = "row mt-3 mb-4">
+            <h2 class = "h2">Tambah Transaksi Manual</h2>
+        </div>
+
+        <!-- form -->
+        <form th:action="@{/transaksi/add}" th:object="${transaksi}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{proses}"/>
+        <div class="container my-2">
+        <div class = "card rounded-25">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col px-5">
+                        <div class="row gy-4 my-2">
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Pihak Terkait<span class="text-danger"> *</span></label>
+                                <input required type="text" class="form-control p2" th:field="*{person}">
+                                <small id="pihakTerkaitHelp" class="form-text text-muted">Isi dengan nama pihak yang terkait dengan transaksi ini
+                                    (bisa berupa perusahaan atau perseorangan)</small>
+                                <div class="invalid-feedback">
+                                Masukkan pihak yang terkait dalam transaksi
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Tanggal Transaksi<span class="text-danger"> *</span></label>
+                                <input required type="datetime-local" class="form-control p2" th:field="*{tanggalTransaksi}">
+                                <div class="invalid-feedback">
+                                    Masukkan tanggal transaksi
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Sumber<span class="text-danger"> *</span></label>
+                                <input required type="text" class="form-control p2" th:field="*{namaProses}">
+                                <div class="invalid-feedback">
+                                    Masukkan sumber transaksi
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col px-5">
+                        <div class="row gy-4 my-2">
+                            <div class="row mb-0 mt-4 gy-1">
+                                <label class="h5 text-raisin-black">Jenis Transaksi <span class="text-danger"> *</span></label>
+                                <div class="form-group">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="jenis" id="pendapatan" value="0" th:field="*{jenisTransaksi}">
+                                        <label class="form-check-label" for="pendapatan"> Pendapatan </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="jenis" id="pengeluaran" value="1" th:field="*{jenisTransaksi}">
+                                        <label class="form-check-label" for="pengeluaran"> Pengeluaran </label>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Pilih jenis transaksi
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Nominal Transaksi (Rupiah)<span class="text-danger"> *</span></label>
+                                <input required type="number" class="form-control p2" th:field="*{nominal}" placeholder="ex: 1000000" max="2147483647">
+                                <div class="invalid-feedback">
+                                    Masukkan nominal transaksi
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Bukti Transaksi<span class="text-danger"> *</span></label>
+                                <input required class="form-control p2" type="file" name="file" accept="image/png, image/jpeg">
+                                <div class="invalid-feedback">
+                                    Masukkan bukti transaksi
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="h5 text-raisin-black">Keterangan</label>
+                                <textarea class="form-control" th:field="*{keterangan}" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- submit button -->
+                <div class="row flex-row-reverse text-end">
+                    <div class="col-4">
+
+                        <!-- Button trigger modal -->
+                        <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal" data-bs-target="#save">
+                            Submit
+                        </a>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="save" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title h6" id="exampleModalLabel">Buat Transaksi Baru</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p3">
+                                        Apakah Anda yakin ingin membuat transaksi baru?
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" id="submitbutton" class="btn-small btn-primary-green">Ya, simpan</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end modal -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </form>
+    </div>
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        $("#save").modal("hide")
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+</body>
+</html>

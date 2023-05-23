@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav sec:authorize="!hasAuthority('DONATUR')"  th:replace="fragments/fragment :: navbar('Penukaran Poin', '')"></nav>
+<nav sec:authorize="hasAuthority('DONATUR')"  th:replace="fragments/fragment :: navbar('Penukaran Poin', ${poin})"></nav>
+
+<div th:if="${listRewardEx.size == 0} OR ${poinAvailable <= 0}" class="d-flex text-center">
+    <div class="container my-5">
+        <h3>Tidak Dapat Menukar Poin</h3>
+        <h6 th:if="${listRewardEx.size == 0}">Tidak terdapat reward yang dapat ditukar</h6>
+        <h6 th:if="${poinAvailable <= 0}" >Anda tidak memiliki cukup poin</h6>
+    </div>
+</div>
+
+<div th:if="${listRewardEx.size != 0} AND ${poinAvailable > 0}" class="d-flex justify-content-center">
+
+    <div class="container my-5">
+        <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <h2 class="h2">Penukaran Poin</h2>
+        </div>
+
+        <!-- start form-->
+        <form th:action="@{/penukaran-poin/add}" th:object="${tukarPoin}" class="needs-validation"
+              id="formTukarPoin" novalidate method="POST">
+
+            <!-- card form -->
+            <div class="card rounded-25 shadow-sm m-2 p-4">
+                <div class="card-body">
+                    <div class="row">
+
+                        <input type="hidden" id="idDonatur" name="idDonatur" class="form-control text-dark" th:field="*{donatur}"/>
+
+                        <!-- Section ID, Nama Donatur, dan Kontak -->
+                        <div class="col-4 px-3">
+                            <div class="mb-4 mt-3">
+                                <label for="nama" class="h5 mb-2">Nama Donatur <span class="text-danger"> *</span></label>
+                                <input required id="nama" type="text" name="nama" class="form-control text-dark" th:field="*{namaDonatur}"/>
+                                <p>
+                                    Masukkan nama donatur
+                                </p>
+                            </div>
+                            <h5 class="h5">Kontak<span class="text-danger"> *</span></h5>
+                            <p class="p4">Isi minimal salah satu antara email atau nomor telepon</p>
+                            <div class="my-4">
+                                <label for="email" class="h6 mb-2">E-mail</label>
+                                <input id="email" type="email" name="email" class="form-control text-dark" th:field="*{email}" placeholder="Masukkan e-mail"/>
+                                <p class="p4">Misal: customer@e-mail.com</p>
+                                <div class="invalid-feedback">
+                                    Masukkan e-mail yang valid
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label for="hp" class="h6 mb-2">Nomor telepon</label>
+                                <input id="hp" type="number" name="hp" class="form-control text-dark" th:field="*{hp}" placeholder="Masukkan nomor telepon"/>
+                                <div class="invalid-feedback">
+                                    Masukkan nomor telepon
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Section Jenis Pengiriman & Alamat-->
+                        <div class="col-4 px-3">
+
+                            <!--Jenis Pengiriman-->
+                            <div class="mb-4 mt-3">
+                                <label class="h5">Pengiriman <span class="text-danger"> *</span></label>
+                                <div class="form-check">
+                                    <input required class="form-check-input" type="radio" name="pengiriman" id="diambil" value="1" th:field="*{isDelivered}">
+                                    <label class="form-check-label" for="diambil"> Diambil sendiri </label>
+                                </div>
+                                <div class="form-check">
+                                    <input required class="form-check-input" type="radio" name="pengiriman" id="dikirim" value="0" th:field="*{isDelivered}">
+                                    <label class="form-check-label" for="dikirim"> Dikirim oleh perusahaan </label>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Pilih jenis pengiriman
+                                </div>
+                            </div>
+
+                            <!--Alamat-->
+                            <div class="my-4">
+                                <label class="h5" for="alamat">Alamat <span class="text-danger"> *</span></label>
+                                <textarea required class="form-control" type="text" name="alamat" id="alamat" th:field="*{alamatDonatur}"></textarea>
+                                <p class="p4">Isi dengan nama jalan, RT, RW, nomor, kelurahan, kecamatan, kota, provinsi, dan kode pos</p>
+                                <div class="invalid-feedback">
+                                    Masukkan alamat
+                                </div>
+                            </div>
+
+                            <!--Rekening-->
+                            <h5 class="h5">Rekening</h5>
+                            <div class="my-4">
+                                <label class="h6" for="bank">Bank <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="text" name="bank" id="bank" th:field="*{bank}" placeholder="Misal: Bank BCA">
+                                <div class="invalid-feedback">
+                                    Masukkan nama bank
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label class="h6" for="bank">No. rekening <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="number" name="noRek" id="noRek" th:field="*{noRekening}" placeholder="Misal: 0780888199">
+                                <div class="invalid-feedback">
+                                    Masukkan nomor rekening
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label class="h6" for="bank">Nama rekening <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="text" name="namaRek" id="namaRek" th:field="*{namaRekening}" placeholder="Misal: Budi Santoso">
+                                <div class="invalid-feedback">
+                                    Masukkan nama di rekening
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!--Section Jenis & Berat Hasil Olahan-->
+                        <div class="col-4 px-3 mb-4 mt-3">
+                            <h5 class="h5">Jenis dan Jumlah Reward</h5>
+                            <p class="p4">Pilih jenis reward yang ingin ditukar dengan poin beserta jumlahnya</p>
+                            <table class="table">
+                                <thead class="text-center p3">
+                                <th class="w-75">Jenis Reward</th>
+                                <th class="w-25">Jumlah</th>
+                                <th></th>
+                                </thead>
+                                <tbody>
+                                <tr th:each="reward, iterationStatus : *{listReward}">
+                                    <td>
+                                        <select th:id="'select'+${iterationStatus.count}" name="reward"
+                                                th:field="*{listReward[__${iterationStatus.index}__].idReward}"
+                                                class="form-control form-select">
+                                            <option value="" selected>Pilih jenis reward</option>
+                                            <div th:each="reward, iterationStatus2 : ${listRewardEx}">
+                                                <option th:id="'reward'+${reward.idReward}"
+                                                        th:value="${reward.idReward}" th:text="${reward.jenisReward()}"></option>
+                                            </div>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input required type="number" name="kuantitas" class="form-control text-dark"
+                                               th:field="*{listReward[__${iterationStatus.index}__].kuantitas}"
+                                               placeholder="20" min="1"/>
+                                        <div class="invalid-feedback">
+                                            Minimal 1
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button th:value="${iterationStatus.index}" class="btn-delete btn-danger" type="submit"
+                                                th:if="${tukarPoin.listReward.size > 1}"
+                                                name="deleteRowItem"><i class="bi bi-dash"></i></button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <button class="btn-small btn-add-row w-100" type="submit" name="addRowItem"
+                                        th:if="${tukarPoin.listReward.size < listRewardEx.size}">
+                                    Tambah Reward<i class="bi bi-plus text-end"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- button -->
+                    <div class="row text-center">
+                        <div class="col-12">
+
+                            <!-- Button trigger modal -->
+                            <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal" data-bs-target="#savechanges">
+                                Submit
+                            </a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="savechanges" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title h6" id="exampleModalLabel">Buat Penukaran Poin</h6>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p3">
+                                            Apakah Anda yakin ingin membuat penukaran poin?
+                                        </div>
+                                        <div class="modal-footer justify-content-center">
+                                            <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" id="submitbutton" name="save" class="btn-small btn-primary-green">Ya, buat</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end modal -->
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+<script>
+
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        $("#savechanges").modal("hide")
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+</script>
+
+</body>
+</html>

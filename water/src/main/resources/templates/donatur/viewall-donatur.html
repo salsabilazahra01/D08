@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav th:replace="fragments/fragment :: navbar('Home', '')"></nav>
+
+<div class="container">
+  <div class="card m-4 p-4">
+    <div class="card-body">
+      <div class="justify-content-center">
+        <h2>Daftar Donatur</h2>
+        <br>
+        <a th:href="@{/donatur/add}" class="btn btn-primary">Tambah Donatur</a>
+        <a class="btn btn-primary" href="/">Beranda</a>
+        <br><br>
+        <div th:if="*{listDonatur.size() != 0}">
+          <table class="table">
+            <thead>
+            <tr>
+              <th style='text-align:center; vertical-align:middle'>No</th>
+              <th style='text-align:center; vertical-align:middle'>Nama</th>
+              <th style='text-align:center; vertical-align:middle'>Username</th>
+              <th style='text-align:center; vertical-align:middle'>Email atau No. HP</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="donatur, iterationStatus : ${listDonatur}"
+                th:style="${iterationStatus.even} ? 'font-weight:bold;'">
+              <td th:text="${iterationStatus.count}" style='text-align:center; vertical-align:middle'></td>
+              <td th:text="${donatur.nama}" style='text-align:center; vertical-align:middle'></td>
+              <td th:text="${donatur.username}" style='text-align:center; vertical-align:middle'></td>
+              <td th:text="${donatur.email_hp}" style='text-align:center; vertical-align:middle'></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:unless="*{listDonatur.size() != 0}">
+          <h2 th:text="'Belum terdapat Donatur yang terdaftar!'"></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

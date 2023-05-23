@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" th:with="pageTitle='Water'">
+<head th:replace="fragments/head :: head"></head>
+<body>
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<header class="mt-5">
+  <h2 class="h1 text-center">Warehouses</h2>
+</header>
+<div class="container">
+  <h2>Tambah Jenis Sampah Baru</h2>
+  <form method="post" th:action="@{/warehouse/add}" id="warehouse-form">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <div class="form-group">
+      <label for="nama-jenis-sampah">Nama Jenis Sampah</label>
+      <input type="text" class="form-control" id="nama-jenis-sampah" name="jenisItem.namaJenisItem" th:value="${jenisItem.namaJenisItem}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="subitems">Sub Jenis Sampah</label>
+      <div id="subitem-container">
+        <div class="row my-2 subitem" th:each="warehouse, iter : ${jenisItem.listWarehouse}">
+          <div class="col-5">
+            <input type="text" class="form-control" placeholder="Nama" name="warehouseList[[${iter.index}]].namaItem" th:value="${warehouse.namaItem}" required>
+          </div>
+          <div class="col-5">
+            <input type="number" class="form-control" placeholder="Harga" name="warehouseList[[${iter.index}]].hargaBeli" th:value="${warehouse.hargaBeli}" min="0" required>
+          </div>
+          <div class="col-2 text-center">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeSubitem(this)">Hapus</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary-green btn-sm mt-3" onclick="addSubitem()">Tambah Sub Jenis Sampah</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Simpan</button>
+  </form>
+
+  <template id="subitem-template">
+    <div class="row my-2 subitem">
+      <div class="col-5">
+        <input type="text" class="form-control" placeholder="Nama" name="subitems[].namaItem" required>
+      </div>
+      <div class="col-5">
+        <input type="number" class="form-control" placeholder="Harga" name="subitems[].hargaBeli" min="0" required>
+      </div>
+      <div class="col-2 text-center">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeSubitem(this)">Hapus</button>
+      </div>
+    </div>
+  </template>
+
+
+  <script>
+    const subitemContainer = document.querySelector("#subitem-container");
+    const subitemTemplate = document.querySelector("#subitem-template");
+
+    function addSubitem() {
+      const subitem = subitemTemplate.content.cloneNode(true);
+      subitemContainer.appendChild(subitem);
+    }
+
+    function removeSubitem(btn) {
+      const subitem = btn.closest(".subitem");
+      subitem.remove();
+    }
+  </script>
+</div>
+
+<th:block th:include="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

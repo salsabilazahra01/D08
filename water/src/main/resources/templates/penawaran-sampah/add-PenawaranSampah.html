@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<nav th:replace="fragments/fragment :: navbar('Jual Sampah', '')"></nav>
+
+<div class="d-flex justify-content-center">
+    <div class="container my-5">
+        <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+        <!-- back button -->
+        <div class="row my-3">
+            <p class="c3">
+                <a type="button" class="btn-small btn-outline-raisin-black h6 me-4"
+                   th:href="@{/penawaran/sampah/viewall}">
+                    <i class="bi-chevron-left"></i>
+                    Back
+                </a>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <h2 class="h2">Buat Penawaran Sampah</h2>
+        </div>
+
+        <!-- form -->
+        <form th:action="@{/penawaran/sampah/add}" th:object="${penawaranSampah}" method="POST">
+            <div sec:authorize="hasAuthority('PARTNER')" >
+                <input type="hidden" th:field="*{partner}"/>
+            </div>
+            <div class="container my-2">
+                <div class="card rounded-25">
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- left column -->
+                            <div class="col px-5">
+                                <div class="row gy-4 my-2">
+                                    <div class="form-group">
+                                        <label class="h5 text-raisin-black">Nama PIC Partner<span
+                                                class="text-danger"> *</span></label>
+                                        <input required type="text" class="form-control p2" th:field="*{namaPic}">
+                                        <div class="invalid-feedback">
+                                            Masukkan nama PIC dari partner
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="h5 text-raisin-black">Nomor Telepon Partner<span
+                                                class="text-danger"> *</span></label>
+                                        <input required type="text" class="form-control p2" th:field="*{kontakPic}">
+                                        <div class="invalid-feedback">
+                                            Masukkan nomor telepon PIC partner yang dapat dihubungi
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-0 mt-4 gy-1">
+                                        <label class="h5 text-raisin-black">Pengiriman<span
+                                                class="text-danger"> *</span></label>
+                                        <div class="form-group">
+                                            <div class="form-check form-check-inline">
+                                                <input required class="form-check-input" type="radio" name="jenis"
+                                                       id="dikirimkan" value="0" th:field="*{isPickedUp}">
+                                                <label class="form-check-label" for="dikirimkan"> Dikirim
+                                                    Partner </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input required class="form-check-input" type="radio" name="jenis"
+                                                       id="diambil" value="1" th:field="*{isPickedUp}">
+                                                <label class="form-check-label" for="diambil"> Diambil oleh
+                                                    perusahaan </label>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Pilih jenis pengiriman
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="h5 text-raisin-black">Alamat<span
+                                                class="text-danger"> *</span></label>
+                                        <input required type="text" class="form-control p2" th:field="*{alamatPic}">
+                                        <div class="invalid-feedback">
+                                            Masukkan alamat pick-up sampah
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="h5 text-raisin-black">Nama Bank<span class="text-danger"> *</span></label>
+                                        <input required type="text" class="form-control p2" th:field="*{bank}">
+                                        <div class="invalid-feedback">
+                                            Masukkan nama Bank
+                                        </div>
+                                    </div>
+                                    <div class="form-group rekening" >
+                                        <label class="h5 text-raisin-black">Nomor Rekening<span
+                                                class="text-danger"> *</span></label>
+                                        <input required type="number" class="form-control p2 rekening"
+                                               max="999999999"
+                                               onKeyPress="if(this.value.length==10) return false;" th:field="*{noRekening}">
+                                        <div class="invalid-feedback">
+                                            Masukkan nomor rekening
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- right column-->
+                            <div class="col px-5">
+                                <div class="row gy-4 my-2">
+                                    <div class="form-group">
+                                        <label class="h5 text-raisin-black" for="inputBerat">Estimasi Berat<span
+                                                class="text-danger"> *</span></label>
+
+                                        <div class="input-group">
+                                            <input required type="number" inputmode="numeric" class="form-control p2" min="11" max="10000"
+                                                   id="inputBerat" th:field="*{berat}">
+                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text"
+                                                                      id="inputBerat2">Kg</span>
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Masukkan estimasi berat sampah
+                                        </div>
+                                        <div id="inputKeteranganBerat" class="form-text">
+                                            Masukan berat dengan satuan Kilogram. Contoh : 150
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="h5">Jenis Sampah</label>
+                                        <table class="table" style="width:100%;">
+                                            <thead></thead>
+                                            <tbody>
+                                            <tr th:each="itemPenawaranSampah, iterationStatus: *{listItemPenawaranSampah}">
+                                                <td>
+                                                    <select class="form-select"
+                                                            name="itemPenawaranSampah"
+                                                            th:field="*{listItemPenawaranSampah[__${iterationStatus.index}__].idItem}" >
+                                                        <div th:each="itemWarehouse, iterationStatus2 : ${listItemWarehouse}">
+                                                            <option th:value="${itemWarehouse.idItem}"
+                                                                    th:text="${itemWarehouse.namaItem}"></option>
+                                                        </div>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <button th:value="${iterationStatus.index}" class="btn-delete btn-danger"
+                                                            type="submit" name="deleteRow" th:if="${penawaranSampah.listItemPenawaranSampah.size() > 1}">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <div th:if="${listItemWarehouse.size() > 0 and penawaranSampah.listItemPenawaranSampah.size() < listItemWarehouse.size()}">
+                                            <button class="btn-small btn-add-row w-100" type="submit"
+                                                    name="addRow">Tambah Item Penawaran Sampah
+                                                <i class="bi bi-plus text-end"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input class="form-control" type="hidden" th:value="null"
+                                               th:name="|keterangan|"/>
+                                        <input class="form-control" type="hidden" th:value="0" th:name="|harga|"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- submit button -->
+                        <div class="row flex-row-reverse text-end">
+                            <div class="col-4">
+
+                                <!-- Button trigger modal -->
+                                <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal"
+                                   data-bs-target="#save">
+                                    Submit
+                                </a>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="save" tabindex="-1" aria-labelledby="exampleModalLabel"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h6 class="modal-title h6" id="exampleModalLabel">Buat Penawaran
+                                                    Sampah</h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p3">
+                                                Apakah Anda yakin ingin membuat penjualan sampah baru?
+                                            </div>
+                                            <div class="modal-footer justify-content-center">
+                                                <button type="button" class="btn-small btn-outline-raisin-black"
+                                                        data-bs-dismiss="modal">Cancel
+                                                </button>
+                                                <button type="submit" name="save" id="submitbutton"
+                                                        class="btn-small btn-primary-green">Ya, simpan
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end modal -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        $("#save").modal("hide")
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav sec:authorize="hasAuthority('CUSTOMER')" th:replace="fragments/fragment :: navbar('Beli Hasil Olahan', '')"></nav>
+<nav sec:authorize="!hasAuthority('CUSTOMER')" th:replace="fragments/fragment :: navbar('Pembelian dan Penjualan', '')"></nav>
+
+<div th:if="${listItemEx.size == 0}" class="d-flex text-center">
+    <div class="container my-5">
+        <h3>Tidak Dapat Membeli Hasil Olahan Sampah</h3>
+        <h6>Tidak terdapat hasil olahan yang dapat dibeli</h6>
+    </div>
+</div>
+
+<div th:if="${listItemEx.size != 0}" class="d-flex justify-content-center">
+
+    <div class="container my-5">
+        <div class="alert alert-danger" role="alert" th:text="${failed}" th:if="${failed}"></div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <h2 class="h2">Beli Hasil Olahan Sampah</h2>
+        </div>
+
+        <!-- start form-->
+        <form th:action="${#authorization.expression('hasAuthority(''CUSTOMER'')')} ? @{/penawaran-hasil-olahan/add} : @{/penawaran-hasil-olahan/add}"
+              th:object="${penawaranOlahan}" class="needs-validation" id="formPenawaranOlahan"  novalidate method="POST" enctype="multipart/form-data">
+
+            <!--onsubmit="submitForm(this.submitted); return false;"-->
+
+            <!-- card form -->
+            <div class="card rounded-25 shadow-sm m-2 p-4">
+                <div class="card-body">
+                    <div class="row">
+
+                        <!-- Section ID, Nama Customer, Nama PIC, dan Kontak -->
+                        <div class="col-4 px-3">
+                            <div class="mb-4 mt-3">
+                                <label for="nama" class="h5 mb-2">Nama Customer <span class="text-danger"> *</span></label>
+                                <input required id="nama" type="text" name="nama" class="form-control text-dark" th:field="*{namaCustomer}"
+                                       th:readonly="${#authorization.expression('hasAuthority(''CUSTOMER'')')}"/>
+                                <small>Nama perusahaan atau nama individu</small>
+                                <p sec:authorize="!hasAuthority('CUSTOMER')" class="invalid-feedback">
+                                    Masukkan nama customer
+                                </p>
+                            </div>
+                            <div class="my-4">
+                                <label for="namaPIC" class="h5 mb-2">Nama PIC <span class="text-danger"> *</span></label>
+                                <input required id="namaPIC" type="text" name="namaPIC" class="form-control text-dark" th:field="*{namaPic}"/>
+                                <small>Nama PIC perusahaan atau nama individu</small>
+                                <p class="invalid-feedback">
+                                    Masukkan nama PIC
+                                </p>
+                            </div>
+                            <h5 class="h5">Kontak<span class="text-danger"> *</span></h5>
+                            <p class="p4">Isi minimal salah satu antara email atau nomor telepon</p>
+                            <div class="my-4">
+                                <label for="email" class="h6 mb-2">E-mail</label>
+                                <input id="email" type="email" name="email" class="form-control text-dark" th:field="*{email}"/>
+                                <small>Misal: customer@e-mail.com</small>
+                                <div class="invalid-feedback">
+                                    Masukkan e-mail yang valid
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label for="hp" class="h6 mb-2">Nomor telepon</label>
+                                <input id="hp" type="number" name="hp" class="form-control text-dark" th:field="*{hp}"/>
+                                <div class="invalid-feedback">
+                                    Masukkan nomor telepon
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Section Jenis Pengiriman & Alamat-->
+                        <div class="col-4 px-3">
+
+                            <!--Jenis Pengiriman-->
+                            <div sec:authorize="hasAuthority('CUSTOMER')" class="mb-4 mt-3">
+                                <label class="h5">Pengiriman <span class="text-danger"> *</span></label>
+                                <div class="form-check">
+                                    <input required class="form-check-input" type="radio" name="pengiriman" id="diambil" value="1" th:field="*{isPickedUp}">
+                                    <label class="form-check-label" for="diambil"> Diambil sendiri </label>
+                                </div>
+                                <div class="form-check">
+                                    <input required class="form-check-input" type="radio" name="pengiriman" id="dikirim" value="0" th:field="*{isPickedUp}">
+                                    <label class="form-check-label" for="dikirim"> Dikirim oleh perusahaan </label>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Pilih jenis pengiriman
+                                </div>
+                            </div>
+
+                            <div sec:authorize="!hasAuthority('CUSTOMER')" class="mb-4 mt-3">
+                                <label class="h5">Tanggal Transaksi <span class="text-danger"> *</span></label>
+                                <div class="input-group">
+                                    <input id="tanggalTransaksi" type="datetime-local" name="tanggal" class="form-control"
+                                           pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}" th:field="*{tanggalDibuat}" required />
+                                    <span class="validity"></span>
+                                    <div class="invalid-feedback">
+                                        Pilih tanggal dan waktu transaksi
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div sec:authorize="!hasAuthority('CUSTOMER')" class="mb-4 mt-3">
+                                <label class="h5">Bukti Transfer <span class="text-danger"> *</span></label>
+                                <input class="form-control p2" type="file" name="fileTransaksi" accept="image/png, image/jpeg">
+                                <span class="validity"></span>
+                                <div class="invalid-feedback">
+                                    Masukkan bukti transfer
+                                </div>
+                            </div>
+
+                            <!--Alamat-->
+                            <div sec:authorize="hasAuthority('CUSTOMER')" class="my-4">
+                                <label class="h5" for="alamat">Alamat <span class="text-danger"> *</span></label>
+                                <textarea required class="form-control" type="text" name="alamat" id="alamat" th:field="*{alamatPic}" placeholder="Masukkan alamat pic atau perusahaan"></textarea>
+                                <p class="p4">Isi dengan nama jalan, RT, RW, nomor, kelurahan, kecamatan, kota, provinsi, dan kode pos</p>
+                                <div class="invalid-feedback">
+                                    Masukkan alamat
+                                </div>
+                            </div>
+
+                            <!--Rekening-->
+                            <h5 class="h5">Rekening</h5>
+                            <div class="my-4">
+                                <label class="h6" for="bank">Bank <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="text" name="bank" id="bank" th:field="*{bank}" placeholder="Misal: Bank BCA">
+                                <div class="invalid-feedback">
+                                    Masukkan nama bank
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label class="h6" for="bank">No. rekening <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="number" name="noRek" id="noRek" th:field="*{noRekening}" placeholder="Misal: 0780888199">
+                                <div class="invalid-feedback">
+                                    Masukkan nomor rekening
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <label class="h6" for="bank">Nama rekening <span class="text-danger"> *</span></label>
+                                <input required class="form-control" type="text" name="namaRek" id="namaRek" th:field="*{namaRekening}" placeholder="Misal: Budi Santoso">
+                                <div class="invalid-feedback">
+                                    Masukkan nama di rekening
+                                </div>
+                            </div>
+                            <div sec:authorize="!hasAuthority('CUSTOMER')" class="my-4">
+                                <label class="h5" for="keterangan">Keterangan</label>
+                                <textarea class="form-control" type="text" name="keterangan" id="keterangan" th:field="*{keterangan}"></textarea>
+                            </div>
+                        </div>
+
+                        <!--Section Keterangan, Jenis & Berat Hasil Olahan-->
+                        <div class="col-4 px-3 mb-4 mt-3">
+                            <h5 class="h5">Jenis dan Berat Hasil Olahan</h5>
+                            <p sec:authorize="hasAuthority('CUSTOMER')" class="p4">Pilih jenis hasil olahan yang ingin dibeli dan beratnya (kg)</p>
+                            <p sec:authorize="!hasAuthority('CUSTOMER')" class="p4">Pilih jenis hasil olahan yang ingin dibeli, berat (kg), dan harganya (Rp)</p>
+                            <table class="table">
+                                <thead class="text-center p3">
+                                <th class="w-50">Jenis Hasil Olahan</th>
+                                <th class="w-25">Berat</th>
+                                <th class="w-25" sec:authorize="!hasAuthority('CUSTOMER')">Harga</th>
+                                <th></th>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item, iterationStatus : *{listItemPenawaranOlahan}">
+                                    <td>
+                                        <select th:id="'select'+${iterationStatus.count}" name="item"
+                                                th:field="*{listItemPenawaranOlahan[__${iterationStatus.index}__].idItem}"
+                                                class="form-control form-select" onchange=quantityCheck(this)>
+                                            <option value="" selected>Pilih jenis</option>
+                                            <div th:each="item, iterationStatus2 : ${listItemEx}">
+                                                <option th:attr="data-kuantitas=${item.kuantitasOlahan}" th:id="'item'+${item.idItem}"
+                                                        th:value="${item.idItem}" th:text="${item.namaItem}"></option>
+                                            </div>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input required th:id="'kuantitas'+${iterationStatus.count}" type="number" name="kuantitas" class="form-control text-dark"
+                                               th:field="*{listItemPenawaranOlahan[__${iterationStatus.index}__].kuantitas}" min="1"/>
+                                        <div class="invalid-feedback">
+                                            Masukkan berat yang sesuai
+                                        </div>
+                                    </td>
+                                    <td sec:authorize="!hasAuthority('CUSTOMER')">
+                                        <input required id="nominal" type="number" name="nominal" class="form-control text-dark"
+                                               th:field="*{listItemPenawaranOlahan[__${iterationStatus.index}__].harga}" min="1"/>
+                                    </td>
+                                    <td>
+                                        <button th:value="${iterationStatus.index}" class="btn-delete btn-danger" type="submit"
+                                                th:if="${penawaranOlahan.listItemPenawaranOlahan.size > 1}"
+                                                name="deleteRowItem"><i class="bi bi-dash"></i></button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <p class="p4">Berat minimal 0.1 kg dan maksimal sesuai dengan kuantitas yang tersedia</p>
+                            <div>
+                                <button class="btn-small btn-add-row w-100" type="submit" name="addRowItem"
+                                        th:if="${penawaranOlahan.listItemPenawaranOlahan.size < listItemEx.size}">
+                                    Tambah Jenis Baru<i class="bi bi-plus text-end"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- button -->
+                    <div class="row text-center">
+                        <div class="col-12">
+
+                            <!-- Button trigger modal -->
+                            <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal" data-bs-target="#savechanges">
+                                Submit
+                            </a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="savechanges" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title h6" id="exampleModalLabel">Buat Penawaran Hasil Olahan</h6>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p3">
+                                            Apakah Anda yakin ingin membuat penawaran pembelian hasil olahan?
+                                        </div>
+                                        <div class="modal-footer justify-content-center">
+                                            <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" id="submitbutton" name="save" class="btn-small btn-primary-green">Ya, buat</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end modal -->
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+<script>
+
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        $("#savechanges").modal("hide")
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+</script>
+
+<script>
+    function quantityCheck(id) {
+        var idSelect = id.id
+        var idItem = idSelect.slice(6, idSelect.length);
+        var kuantitasOption = document.getElementById("item"+id.value).getAttribute('data-kuantitas');
+
+        document.getElementById("kuantitas"+idItem).max = kuantitasOption
+    }
+</script>
+
+</body>
+</html>

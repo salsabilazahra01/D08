@@ -1,0 +1,29 @@
+#server:
+#  address: 0.0.0.0
+#  port: 8080
+
+spring.jpa.defer-datasource-initialization: true
+spring.sql.init.mode: always
+
+spring:
+  # konfigurasi untuk koneksi db
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+
+    # sesuaikan nama database anda dengan di bawah ini
+    url: jdbc:mysql://root:ayZMYRaMgzCPqNnwTf63@containers-us-west-136.railway.app:5656/railway
+
+    # sesuaikan dengan NAMA dan PASSWORD anda dengan username password di bawah ini
+    username: root
+    password: ayZMYRaMgzCPqNnwTf63
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        format_sql: true
+
+    # pembuatan database (create || create-drop || validate || update)
+    hibernate.ddl-auto: create-drop
+
+    show-sql: true

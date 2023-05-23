@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<nav th:replace="fragments/fragment :: navbar('Home', '')"></nav>
+
+    <div class="wrapper fadeInDown">
+        <div id="formContent">
+            <!-- Register Form -->
+            <h2 class="active"> Sign Up </h2>
+            <form th:action="@{/register}" method="post">
+                <input type="text" id="username" class="fadeIn second" th:name="username" placeholder="username" required>
+                <input type="text" id="nama" class="fadeIn third" th:name="nama" placeholder="full name" required>
+                <input type="email" id="emailHp" class="fadeIn third" th:name="emailHp" placeholder="email" required>
+                <input type="password" id="password" class="fadeIn third" th:name="password" placeholder="password" required>
+                <input type="submit" class="fadeIn fourth" value="Sign Up">
+            </form>
+            <!-- Login -->
+            <div id="formFooter">
+                <a class="underlineHover" th:href="@{/login}">Back to Login</a>
+            </div>
+        </div>
+    </div>
+    <footer th:replace="fragments/fragment :: footer"></footer>
+
+</body>
+</html>

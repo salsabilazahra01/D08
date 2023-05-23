@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('', ${poin})"></nav>
+<nav sec:authorize="!hasAuthority('DONATUR') || !isAuthenticated()" th:replace="fragments/fragment :: navbar('', '')"></nav>
+
+<div class="container">
+    <div class="col-12 mt-5">
+        <h1 class="text-center text-head-profile">Update My Profile</h1>
+    </div>
+
+    <div class="card m-5 py-5 px-5 rounded-25">
+        <form method="post" th:action="@{/user/profile/edit}">
+            <div class="d-flex flex-md-row flex-column justify-content-between">
+                <div class="col-12 col-md-5">
+                    <div class="form-group">
+                        <label for="username" class="text-label-form-profile">Username</label>
+                        <input name="username" th:value="${auth.username}" id="username" class="form-control rounded-3 disabled" disabled required/>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="fname" class="text-label-form-profile">Nama <span class="text-danger">*</span></label>
+                        <input name="fname" th:value="${auth.nama}" id="fname" class="form-control rounded-3" required />
+                        <small id="fnamehelp" class="form-text text-muted">Isi dengan nama perusahaan atau dengan nama individu</small>
+                    </div>
+
+                    <div class="form-group  mt-3">
+                        <label for="email" class="text-label-form-profile">Email</label>
+                        <input name="email" th:value="${auth.email}" id="email" type="email" class="form-control rounded-3" required />
+<!--                        <small id="emailhelp" class="form-text text-muted">pilih salah satu</small>-->
+                    </div>
+
+                    <div th:if="${pic}" class="form-group  mt-3">
+                        <label for="namaPic" class="text-label-form-profile">Nama PIC<span class="text-danger">*</span></label>
+                        <input name="namaPic" th:value="${added.namaPic}" id="namaPic" class="form-control rounded-3" required />
+                        <small id="namaPicHelp" class="form-text text-muted">Isi dengan nama penanggung jawab di perusahaan Anda atau dengan nama Anda sendiri</small>
+                    </div>
+
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <div th:if="${added}" class="form-group">
+                        <label for="alamat" class="text-label-form-profile">Alamat<span class="text-danger">*</span></label>
+                        <input name="alamat" th:value="${added.alamat}" id="alamat" class="form-control rounded-3" required />
+                        <small id="alamathelp" class="form-text text-muted">Isi dengan nama jalan, RT, RT, dan nomor alamat</small>
+                    </div>
+
+                    <div th:if="${added}" class="form-group  mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="kelurahan" class="text-label-form-profile">Kelurahan<span class="text-danger">*</span></label>
+                                <input name="kelurahan" th:value="${added.kelurahan}" id="kelurahan" class="form-control rounded-3" required />
+                            </div>
+                            <div class="col-6">
+                                <label for="kecamatan" class="text-label-form-profile">Kecamatan<span class="text-danger">*</span></label>
+                                <input name="kecamatan" th:value="${added.kecamatan}" id="kecamatan" class="form-control rounded-3" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${added}" class="form-group  mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="kota" class="text-label-form-profile">Kota<span class="text-danger">*</span></label>
+                                <input name="kota" th:value="${added.kota}" id="kota" class="form-control rounded-3" required />
+                            </div>
+                            <div class="col-6">
+                                <label for="provinsi" class="text-label-form-profile">Provinsi<span class="text-danger">*</span></label>
+                                <input name="provinsi" th:value="${added.provinsi}" id="provinsi" class="form-control rounded-3" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${added}" class="form-group  mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="kodePos" class="text-label-form-profile">Kode Pos<span class="text-danger">*</span></label>
+                                <input type="number" name="kodePos" th:value="${added.kodePos}" id="kodePos" class="form-control rounded-3" required />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-2 d-flex justify-content-center">
+
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-outline-raisin-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Cancel
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Konfirmasi Cancel</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Apakah anda yakin ingin membuang perubahan ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-raisin-black" data-bs-dismiss="modal">Tidak</button>
+                                <a class="btn btn-primary-green text-white" th:href="@{/user/profile}">Ya</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary-green px-3 py-2">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

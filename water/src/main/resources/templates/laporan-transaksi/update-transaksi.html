@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<div class="d-flex justify-content-center">
+
+    <div class="container my-5">
+
+        <!-- button & id -->
+        <div class="row my-3">
+            <p class="c3">
+                <a type = "button" class = "btn-small btn-outline-raisin-black h6 me-4" th:href="@{/transaksi/view/} + ${transaksi.idTransaksi}">
+                    <i class="bi-chevron-left"></i> Back
+                </a>
+                <text class="c3" th:text="${transaksi.idTransaksi}"></text>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <h2 class="h2">Update Transaksi</h2>
+        </div>
+
+        <!-- start form-->
+        <form th:action="${transaksi.proses == 2} ? @{/transaksi/update/proses-lain} : @{/transaksi/update/sampah-olahan}"
+              th:object="${transaksi}" class="needs-validation" enctype="multipart/form-data" novalidate method="POST">
+
+            <!-- card form -->
+            <div class="card rounded-25 shadow-sm m-2 p-2">
+                <div class="card-body">
+                    <div class="row">
+
+                        <!-- Section ID, Pihak, Jenis -->
+                        <div class="col-4 px-5">
+
+                            <!--ID-->
+                            <div class="mb-5 mt-3">
+                                <label for="idTransaksi" class="h5 mb-2">ID Transaksi</label>
+                                <input id="idTransaksi" type="text" name="person" class="form-control text-dark" th:field="*{idTransaksi}" readonly/>
+                            </div>
+
+                            <!--Pihak-->
+                            <div class="my-5" th:switch="${transaksi.proses}">
+                                <label for="pihak" class="h5">Pihak Terkait <span th:if="${transaksi.proses}==2" class="text-danger"> *</span></label>
+                                <input th:case="0" type="text" name="person" class="form-control text-dark" th:field="*{penawaranSampah.partner.nama}" readonly/>
+                                <input th:case="1" type="text" name="person" class="form-control text-dark" th:field="*{penawaranOlahan.customer.nama}" readonly/>
+                                <input th:case="2" type="text" name="person" class="form-control has-validation" id="pihak" required="required" th:field="*{person}"/>
+                                <input th:case="3" type="text" name="person" class="form-control text-dark" th:field="*{tukarPoin.donatur.nama}" readonly/>
+                                <div class="invalid-feedback">
+                                    Masukkan pihak terkait
+                                </div>
+                            </div>
+
+                            <!--Jenis-->
+                            <div class="mt-5 mb-3">
+                                <label class="h5">Jenis Transaksi <span th:if="${transaksi.proses}==2" class="text-danger"> *</span></label>
+                                <div class="form-check" th:if="${transaksi.proses == 2}">
+                                    <input class="form-check-input" type="radio" name="jenis" id="pendapatan" value="0" th:field="*{jenisTransaksi}" th:checked="${!transaksi.jenisTransaksi}">
+                                    <label class="form-check-label" for="pendapatan"> Pendapatan </label>
+                                </div>
+                                <div class="form-check" th:if="${transaksi.proses == 2}">
+                                    <input class="form-check-input" type="radio" name="jenis" id="pengeluaran" value="1" th:field="*{jenisTransaksi}" th:checked="${transaksi.jenisTransaksi}">
+                                    <label class="form-check-label" for="pengeluaran"> Pengeluaran </label>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Pilih jenis transaksi
+                                </div>
+                                <input th:unless="${transaksi.proses == 2}" type="text" name="jenis" class="form-control text-dark"  th:value="*{proses} ? 'Pendapatan' : 'Pengeluaran'" readonly/>
+                            </div>
+
+                        </div>
+
+                        <!--Section Sumber & Keterangan-->
+                        <div class="col-4 px-5">
+
+                            <!--Sumber-->
+                            <div class="mb-5 mt-3" th:switch="${transaksi.proses}">
+                                <label class="h5" for="namaProses">Sumber<span th:if="${transaksi.proses}==2" class="text-danger"> *</span></label>
+                                <input th:case="0" type="text" name="namaProses" class="form-control text-dark" th:field="*{penawaranSampah.idPenawaranSampah}" readonly/>
+                                <input th:case="1" type="text" name="namaProses" class="form-control text-dark" th:field="*{penawaranOlahan.idPenawaranOlahan}" readonly/>
+                                <input th:case="2" type="text" name="namaProses" class="form-control" id="namaProses" required="required" th:field="*{namaProses}"/>
+                                <input th:case="3" type="text" name="namaProses" class="form-control text-dark" th:field="*{tukarPoin.idTukarPoin}" readonly/>
+                                <div class="invalid-feedback">
+                                    Masukkan sumber transaksi
+                                </div>
+                            </div>
+
+                            <!--Keterangan-->
+                            <div class="mt-5 mb-3">
+                                <label class="h5" for="keterangan">Keterangan</label>
+                                <textarea class="form-control" type="text" name="keterangan" id="keterangan" th:field="*{keterangan}" placeholder="Masukkan keterangan"></textarea>
+                            </div>
+
+                        </div>
+
+                        <!--Section Tanggal & Nominal-->
+                        <div class="col-4 px-5">
+
+                            <!-- Tanggal -->
+                            <div class="mb-5 mt-3">
+                                <label class="h5" for="tanggalTransaksi">Tanggal Transaksi<span th:if="${transaksi.proses}==2" class="text-danger"> *</span></label>
+                                <div th:if="${transaksi.proses == 2}" class="input-group">
+                                    <input id="tanggalTransaksi" type="datetime-local" name="tanggal" class="form-control"
+                                           pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}" th:field="*{tanggalTransaksi}" required />
+                                    <span class="validity"></span>
+                                    <div class="invalid-feedback">
+                                        Pilih tanggal dan waktu transaksi
+                                    </div>
+                                </div>
+                                <input th:unless="${transaksi.proses == 2}" type="text" name="tanggal" class="form-control text-dark"
+                                       th:field="*{tanggalTransaksi}" readonly/>
+                            </div>
+
+                            <!--Nominal-->
+                            <div class="mt-5 mb-3">
+                                <label class="h5 " for="nominal">Nominal Transaksi (Rupiah)<span th:if="${transaksi.proses}==2" class="text-danger"> *</span></label>
+                                <input th:if="${transaksi.proses == 2}" type="text" pattern="^[0-9]*$" max="2147483647" name="nominal" class="form-control" id="nominal" required="required" th:field="*{nominal}"/>
+                                <div class="invalid-feedback">
+                                    Masukkan nominal dalam bentuk angka
+                                </div>
+                                <input th:unless="${transaksi.proses == 2}" type="text" name="nominal" class="form-control text-dark" th:field="*{nominal}" readonly/>
+                            </div>
+
+                            <!-- bukti -->
+                            <div class="mt-5 mb-3">
+                                <p class="h5 text-raisin-black">Bukti Transaksi<span class="text-danger"> *</span></p>
+                                <input class="form-control p2" type="file" name="file" accept="image/png, image/jpeg">
+                                <div id="titleimage" class="form-text">
+                                    Masukan Foto Dengan Format png atau jpeg. Max= 500Kb
+                                </div>
+                                <div class="zoomin pt-2">
+                                    <figcaption>Bukti saat ini</figcaption>
+                                    <img th:src="${transaksi.buktiImagePath}" title="Image"/>
+                                </div>
+                            </div>
+
+                            <br>
+
+                        </div>
+
+                    </div>
+
+                    <!-- button -->
+                    <div class="row flex-row-reverse text-end">
+                        <div class="col-4">
+
+                            <!-- Button trigger modal -->
+                            <a type="button" class="mx-2 btn-small btn-primary-green" data-bs-toggle="modal" data-bs-target="#savechanges">
+                                Simpan
+                            </a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="savechanges" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title h6" id="exampleModalLabel">Simpan Perubahan</h6>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p3">
+                                            Apakah Anda yakin ingin menyimpan perubahan?
+                                        </div>
+                                        <div class="modal-footer justify-content-center">
+                                            <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" id="submitbutton" class="btn-small btn-primary-green">Ya, simpan</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end modal -->
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        $("#savechanges").modal("hide")
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+</body>
+</html>

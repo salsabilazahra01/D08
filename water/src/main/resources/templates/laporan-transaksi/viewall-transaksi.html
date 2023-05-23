@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<div class="container mt-lg-5">
+    <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="card m-4 p-4 rounded-25">
+        <div class="card-body">
+            <div class="justify-content-center">
+
+                <form th:action="@{/transaksi/viewall/} + ${jenis}" id="searchForm">
+
+                <!--title-->
+                    <div class="row">
+                        <h2 class="h2">Daftar Transaksi Keuangan</h2>
+                    </div>
+
+                    <!--section bar-->
+                    <div th:if="${#strings.equals(jenis, 'semua')}">
+                        <nav th:replace="fragments/fragment-transaksi :: navbar('Semua')"></nav>
+                    </div>
+                    <div th:if="${#strings.equals(jenis, 'pendapatan')}" >
+                        <nav th:replace="fragments/fragment-transaksi :: navbar('Pendapatan')"></nav>
+                    </div>
+                    <div th:if="${#strings.equals(jenis, 'pengeluaran')}">
+                        <nav th:replace="fragments/fragment-transaksi :: navbar('Pengeluaran')"></nav>
+                    </div>
+
+
+                    <!--total, tambah transaksi-->
+                    <div class="row mt-3">
+                        <div class="col text-start">
+                            <h6 class="h6">Total</h6>
+                            <h3 class="h4" th:text="${total == 0} ? 'Rp 0,00' : 'Rp ' + ${#numbers.formatDecimal(total, 0, 'POINT', 2, 'COMMA')}"></h3>
+                        </div>
+
+                        <div class="col text-end">
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn-small btn-primary-green bi-download mx-4 h3"
+                                    data-bs-toggle="modal" data-bs-target="#downloadModal">
+                                Download
+                            </button>
+                            <a type = "button" class = "btn-small btn-outline-primary-green h6 mt-4" th:href="@{/transaksi/add}">
+                                <span class="bi-plus"></span> Tambah Transaksi Baru
+                            </a>
+                        </div>
+                    </div>
+                    <br>
+
+                    <!--list transaksi-->
+                    <div class="row" id="semuaTransaksi">
+                        <br>
+                        <table class="table table-striped text-center align-middle">
+                            <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>ID Transaksi</th>
+                                <th>Tanggal, Waktu</th>
+                                <th>Nominal Transaksi</th>
+                                <th th:if="${#strings.equals(jenis, 'semua')}">Jenis Transaksi</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="transaksi, iterationStatus : ${listTransaksi}">
+                                <td th:text="${firstItem} + ${iterationStatus.count} - 1"></td>
+                                <td class="text-center" th:text="${transaksi.idTransaksi}"></td>
+                                <td th:text="${#temporals.format(transaksi.tanggalTransaksi, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td th:text="'Rp ' + ${#numbers.formatDecimal(transaksi.nominal, 0, 'POINT', 2, 'COMMA')}"></td>
+                                <td th:if="${#strings.equals(jenis, 'semua')}" th:text="${transaksi.jenisTransaksi} ? 'Pengeluaran':'Pendapatan'"></td>
+                                <td>
+                                    <a type="button" class="mx-2 btn-small btn-primary-green" th:href="@{/transaksi/view/} + ${transaksi.idTransaksi}">Detail</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                <!-- pagination & page size -->
+                <div class="row mt-4 p3">
+                    <div class="col text-start">
+                        <label class="d-inline-block p3" for="pageSize">Show: </label>
+                        <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="form-select form-select-sm d-inline-block" style="width:auto;"
+                                id="pageSize">
+                            <option th:each="s : ${ {5, 10, 15, 20} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                        </select>
+                        <p class="d-inline-block p3" th:text="'Result: ' + ${firstItem} + '-' + ${lastItem} + ' of ' + ${totalItems}"></p>
+                    </div>
+                    <div class="col text-end">
+                        <nav class="d-inline-block" aria-label="Pagination" th:if="${totalPages > 0}">
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                    <a class="fw-bold" th:replace="fragments/fragment-transaksi :: paging(${jenis},${currentPage - 1}, 'Previous', 'Previous Page')"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${1 == currentPage} ? 'active'">
+                                    <a th:replace="fragments/fragment-transaksi :: paging(${jenis},1, '1', 'First Page')"></a>
+                                </li>
+                                <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                                    <a class="page-link" href="#">...</a>
+                                </li>
+                                <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                                    th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 1 : 1, currentPage + 2 < totalPages ? currentPage + 1 : totalPages)}">
+                                    <a th:replace="${page != 1 && page != totalPages} ? ~{fragments/fragment-transaksi :: paging(${jenis}, ${page}, ${page}, 'Page ' + ${page})} : _"></a>
+                                </li>
+                                <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                                    <a class="page-link" href="#">...</a>
+                                </li>
+                                <li class="page-item" th:classappend="${totalPages == currentPage} ? 'active'">
+                                    <a th:replace="${totalPages != 1} ? ~{fragments/fragment-transaksi :: paging(${jenis}, ${totalPages}, ${totalPages}, 'Last Page')} : _"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                    <a class="fw-bold" th:replace="fragments/fragment-transaksi :: paging(${jenis}, ${currentPage + 1},'Next', 'Next Page')"></a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <!-- end pagination & page size -->
+
+                </form>
+
+                <form th:action="@{/transaksi/download}" method="POST">
+                <!-- Modal -->
+                <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title h6" id="downloadModalLabel">Download Transaksi</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p3 mx-2">
+                                <!--periode-->
+                                <div>
+                                    <h5 class="h6">Periode Transaksi</h5>
+                                    <div class="row">
+                                        <div class="col-4 form-group">
+                                            <label class="text-raisin-black">Awal<span class="text-danger"> *</span></label>
+                                            <input style="width: 150px; height: 40px;" required name="periodeawal" type="date" class="form-control p2">
+                                        </div>
+                                        <div class="col-4 ms-2 form-group">
+                                            <label class="text-raisin-black">Akhir<span class="text-danger"> *</span></label>
+                                            <input style="width: 150px; height: 40px;" required name="periodeakhir" type="date" class="form-control p2">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- jenis -->
+                                <div class="mt-4">
+                                    <!--                                    <h5 class="h6">Jenis Transaksi</h5>-->
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="semua" value="true" id="semua" onclick="actionSemua()">
+                                        <label class="form-check-label h6" for="semua">
+                                            Semua Jenis Transaksi
+                                        </label>
+                                    </div>
+                                    <div class="ms-4">
+                                        <!--pendapatan-->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="pendapatan" value="true" id="pendapatan" onclick="actionPendapatan()">
+                                            <label class="form-check-label" for="pendapatan">
+                                                Pendapatan
+                                            </label>
+                                        </div>
+                                        <div class="form-check ms-4">
+                                            <input class="form-check-input" type="checkbox" name="penjualanolahan" value="true" id="penjualanolahan" onclick="actionPenjualanOlahan()">
+                                            <label class="form-check-label" for="penjualanolahan">
+                                                Penjualan Hasil Olahan Sampah
+                                            </label>
+                                        </div>
+                                        <div class="form-check ms-4">
+                                            <input class="form-check-input" type="checkbox" name="sumberlainpendapatan" value="true" id="sumberlainpendapatan" onclick="actionSumberLainPendapatan()">
+                                            <label class="form-check-label" for="sumberlainpendapatan">
+                                                Sumber Lain
+                                            </label>
+                                        </div>
+
+                                        <!--pengeluaran-->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="pengeluaran" value="true" id="pengeluaran" onclick="actionPengeluaran()">
+                                            <label class="form-check-label" for="pengeluaran">
+                                                Pengeluaran
+                                            </label>
+                                        </div>
+                                        <div class="form-check ms-4">
+                                            <input class="form-check-input" type="checkbox" name="pembeliansampah" value="true" id="pembeliansampah" onclick="actionPembelianSampah()">
+                                            <label class="form-check-label" for="pembeliansampah">
+                                                Pembelian Sampah
+                                            </label>
+                                        </div>
+                                        <div class="form-check ms-4">
+                                            <input class="form-check-input" type="checkbox" name="sumberlainpengeluaran" value="true" id="sumberlainpengeluaran" onclick="actionSumberLainPengeluaran()">
+                                            <label class="form-check-label" for="sumberlainpengeluaran">
+                                                Sumber Lain
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn-small btn-primary-green">Export to CSV</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+<!-- Table and Pagination Bar -->
+<script type="text/javascript">
+    function changePageSize() {
+        document.getElementById('searchForm').submit()
+    }
+</script>
+
+<script type="text/javascript">
+    function actionSemua() {
+        var semua = document.getElementById("semua");
+        var pendapatan = document.getElementById("pendapatan");
+        var penjualanOlahan = document.getElementById("penjualanolahan");
+        var sumberLainPendapatan = document.getElementById("sumberlainpendapatan");
+        var pengeluaran = document.getElementById("pengeluaran");
+        var pembelianSampah = document.getElementById("pembeliansampah");
+        var sumberLainPengeluaran = document.getElementById("sumberlainpengeluaran");
+
+        if(semua.checked == false){
+           pengeluaran.checked = false
+           pendapatan.checked = false
+           penjualanOlahan.checked = false
+           pembelianSampah.checked = false
+           sumberLainPendapatan.checked = false
+           sumberLainPengeluaran.checked = false
+        } else {
+           pengeluaran.checked = true
+           pendapatan.checked = true
+           penjualanOlahan.checked = true
+           pembelianSampah.checked = true
+           sumberLainPendapatan.checked = true
+           sumberLainPengeluaran.checked = true
+        }
+    }
+
+    function actionPendapatan() {
+        var pendapatan = document.getElementById("pendapatan");
+        var penjualanOlahan = document.getElementById("penjualanolahan");
+        var sumberLainPendapatan = document.getElementById("sumberlainpendapatan");
+
+        if(pendapatan.checked == false){
+           penjualanOlahan.checked = false
+           sumberLainPendapatan.checked = false
+        } else {
+           penjualanOlahan.checked = true
+           sumberLainPendapatan.checked = true
+        }
+    }
+
+    function actionPengeluaran() {
+        var pengeluaran = document.getElementById("pengeluaran");
+        var pembelianSampah = document.getElementById("pembeliansampah");
+        var sumberLainPengeluaran = document.getElementById("sumberlainpengeluaran");
+
+        if(pengeluaran.checked == false){
+           sumberLainPengeluaran.checked = false
+           pembelianSampah.checked = false
+        } else {
+           pembelianSampah.checked = true
+           sumberLainPengeluaran.checked = true
+        }
+    }
+
+    function actionPembelianSampah() {
+        var pengeluaran = document.getElementById("pengeluaran");
+        var pembelianSampah = document.getElementById("pembeliansampah");
+        var sumberLainPengeluaran = document.getElementById("sumberlainpengeluaran");
+
+        if(pembelianSampah.checked == true && sumberLainPengeluaran.checked == true){
+           pengeluaran.checked = true
+        } else if (pembelianSampah.checked == false && sumberLainPengeluaran.checked == false){
+            pengeluaran.checked = false
+        }
+    }
+
+    function actionPenjualanOlahan() {
+        var pendapatan = document.getElementById("pendapatan");
+        var penjualanOlahan = document.getElementById("penjualanolahan");
+        var sumberLainPendapatan = document.getElementById("sumberlainpendapatan");
+
+        if(penjualanOlahan.checked == true && sumberLainPendapatan.checked == true){
+           pendapatan.checked = true
+        } else if (penjualanOlahan.checked == false && sumberLainPendapatan.checked == false){
+            pendapatan.checked = false
+        }
+    }
+
+    function actionSumberLainPendapatan() {
+        var pendapatan = document.getElementById("pendapatan");
+        var penjualanOlahan = document.getElementById("penjualanolahan");
+        var sumberLainPendapatan = document.getElementById("sumberlainpendapatan");
+
+        if(penjualanOlahan.checked == true && sumberLainPendapatan.checked == true){
+           pendapatan.checked = true
+        } else if(penjualanOlahan.checked == false && sumberLainPendapatan.checked == false){
+           pendapatan.checked = false
+        }
+    }
+
+    function actionSumberLainPengeluaran() {
+        var pengeluaran = document.getElementById("pengeluaran");
+        var pembelianSampah = document.getElementById("pembeliansampah");
+        var sumberLainPengeluaran = document.getElementById("sumberlainpengeluaran");
+
+        if(pembelianSampah.checked == true && sumberLainPengeluaran.checked == true){
+           pengeluaran.checked = true
+        } else if(pembelianSampah.checked == false && sumberLainPengeluaran.checked == false){
+           pengeluaran.checked = false
+        }
+
+    }
+</script>
+
+</body>
+</html>

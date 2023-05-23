@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<div class="d-flex justify-content-center">
+  <div class="m-4">
+    <h2>Manajemen User</h2>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/customer/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Customer</a>
+    </div><br>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/donatur/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Donatur</a>
+    </div><br>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/manajer/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Manajer</a>
+    </div>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/partner/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Partner</a>
+    </div>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/pekerja/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Pekerja</a>
+    </div>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/supervisor/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Supervisor</a>
+    </div>
+    <div class="d-flex justify-content-center">
+      <a th:href="@{/teknisi/viewall}" class="mx-2 btn btn-primary">Lihat Daftar Teknisi</a>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

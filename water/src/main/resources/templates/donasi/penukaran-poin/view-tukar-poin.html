@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+
+<nav sec:authorize="hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Penukaran Poin', ${poin})"></nav>
+<nav sec:authorize="!hasAuthority('DONATUR')" th:replace="fragments/fragment :: navbar('Penukaran Poin', '')"></nav>
+
+<div class="d-flex justify-content-center">
+
+    <div class="container my-5">
+
+        <!-- alert -->
+        <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}" enctype="multipart/form-data"></div>
+
+        <!-- button & id -->
+        <div class="row my-1">
+            <p class="c3">
+                <a type = "button" class = "btn-small btn-outline-raisin-black h6 me-4" th:href="@{/penukaran-poin/viewall/-1}">
+                    <i class="bi-chevron-left"></i> Back
+                </a>
+                <text class="c3" th:text="${tukarPoin.idTukarPoin}"></text>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class="row mb-3">
+            <p class="align-content-center">
+                <h2 class="h2">Detail Penukaran Poin
+                <a sec:authorize="hasAuthority('DONATUR')" th:if="${tukarPoin.status == 0}" type = "button"
+                   class = "btn-small-fit btn-red-danger h6" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-x-circle-fill"></i> Batalkan
+                </a>
+                </h2>
+            </p>
+        </div>
+
+        <!-- detail -->
+        <div class="row">
+            <div class="col-6">
+                <div class="card rounded-25 shadow-sm px-5 py-3">
+                    <div class="card-body">
+                        <div class="mb-5 mt-3">
+                            <p class="p2">ID Penukaran Poin</p>
+                            <h3 class="h4" th:text="${tukarPoin.idTukarPoin}"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Nama Donatur</p>
+                            <h3 class="h4" th:text="${tukarPoin.namaDonatur}"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">E-mail</p>
+                            <h3 class="h4" th:text="${tukarPoin.email == ''} ? '-' : ${tukarPoin.email}"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Nomor telepon</p>
+                            <h3 class="h4" th:text="${tukarPoin.hp == ''} ? '-' : ${tukarPoin.hp}"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Tanggal, waktu dibuat</p>
+                            <h3 class="h4" th:text="${#temporals.format(tukarPoin.tanggalDibuat, 'dd-MM-yyyy HH:mm')}"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Pilihan pengiriman</p>
+                            <h3 class="h4" th:text="${tukarPoin.isDelivered} ? 'Diambil donatur':'Dikirimkan CV'"></h3>
+                        </div>
+                        <div class="my-5" th:if="${!tukarPoin.isDelivered}">
+                            <p class="p2">Bukti Pengiriman</p>
+                            <img th:src="${tukarPoin.buktiKirim == null} ? '-' : ${tukarPoin.buktiKirimPath}" style="width: 200; height: auto">
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Alamat</p>
+                            <h3 class="h4" th:text="${tukarPoin.alamatDonatur != NULL} ? ${tukarPoin.alamatDonatur} : '-'"></h3>
+                        </div>
+                        <div class="my-5">
+                            <p class="p2">Rekening</p>
+                            <h3 class="h4" th:text="${tukarPoin.bank} + ' ' + ${tukarPoin.noRekening} + ' a.n ' + ${tukarPoin.namaRekening}"></h3>
+                        </div>
+                        <div sec:authorize="!hasAuthority('DONATUR')" class="my-5">
+                            <p class="p2">Laporan Transaksi</p>
+                            <p class="h4" th:if="${tukarPoin.transaksiTukarPoin == NULL }">-</p>
+                            <a class="h4" th:if="${tukarPoin.transaksiTukarPoin != NULL }" th:text="${tukarPoin.transaksiTukarPoin.idTransaksi}"
+                               th:href="@{/transaksi/view/} + ${tukarPoin.transaksiTukarPoin.idTransaksi}"></a>                        </div>
+                        <div class="mt-5 mb-3" th:switch="${tukarPoin.status}">
+                            <p class="p2">Status</p>
+                            <h3 th:text="${tukarPoin.statusStr()}"
+                                th:class="${tukarPoin.status == 3} ? 'h4 text-success' : (${tukarPoin.status == 4} ? 'h4 text-danger' : 'h4')"></h3>
+                            <p th:if="${tukarPoin.keteranganTolak != null}" class="p3"
+                               th:text="${tukarPoin.keteranganTolak}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 px-5">
+                <p class="h5 mb-4">Jenis dan Jumlah Reward Ditukar</p>
+                <table class="table table-striped text-center align-middle">
+                    <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Jenis Reward</th>
+                        <th>Poin</th>
+                        <th>Jumlah</th>
+                        <th>Poin Ditukar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="reward, iterationStatus : ${listReward}">
+                        <td th:text="${iterationStatus.count}"></td>
+                        <td th:text="${reward.idReward.jenisReward()}"></td>
+                        <td th:text="${#numbers.formatInteger(reward.idReward.poin, 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatInteger(reward.kuantitas, 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatInteger(reward.idReward.poin*reward.kuantitas, 0, 'POINT')}"></td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td colspan="3">Total</td>
+                        <td th:text="${#numbers.formatInteger(totalKuantitas, 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatInteger(totalPoin, 0, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- MODAL BUTTON -->
+                <div>
+                    <a sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 0}" type = "button"
+                       class = "btn btn-primary-green h6 d-block" data-bs-toggle="modal" data-bs-target="#setujuiModal">Setujui Penukaran Poin</a>
+                </div>
+                <div>
+                    <a sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 0}" type = "button"
+                       class = "btn btn-red-danger h6 d-block" data-bs-toggle="modal" data-bs-target="#tolakModal">Tolak Penukaran Poin</a>
+                </div>
+                <div th:if="${tukarPoin.isDelivered != null}">
+                    <p sec:authorize="hasAuthority('DONATUR')" th:if="${tukarPoin.status == 1 and !tukarPoin.isDelivered}"
+                       class = "btn btn-disabled c3 d-block">Menunggu pengiriman reward dari perusahaan</p>
+                    <a sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 1 and !tukarPoin.isDelivered}" type = "button"
+                       class = "btn btn-outline-primary-green h6 d-block" data-bs-toggle="modal" data-bs-target="#kirimModal">Reward sudah dikirim</a>
+                </div>
+                <div th:if="${tukarPoin.isDelivered != null}">
+                    <p sec:authorize="hasAuthority('DONATUR')" th:if="${tukarPoin.status == 1 and tukarPoin.isDelivered}"
+                       class = "btn btn-disabled c3 d-block">Menunggu konfirmasi reward dapat diambil</p>
+                    <a sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 1 and tukarPoin.isDelivered}" type = "button"
+                       class = "btn btn-outline-primary-green h6 d-block" data-bs-toggle="modal" data-bs-target="#ambilModal">Reward dapat diambil</a>
+                </div>
+                <div th:if="${tukarPoin.isDelivered != null}">
+                    <p sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 2 and tukarPoin.isDelivered}"
+                       class = "btn btn-disabled c3 d-block">Menunggu konfirmasi pengambilan dari donatur</p>
+                    <a sec:authorize="hasAuthority('DONATUR')" th:if="${tukarPoin.status == 2 and tukarPoin.isDelivered}" type = "button"
+                       class = "btn btn-outline-primary-green h6 d-block" data-bs-toggle="modal" data-bs-target="#konfirmasiAmbilModal">Konfirmasi pengambilan</a>
+                    <p sec:authorize="!hasAuthority('DONATUR')" th:if="${tukarPoin.status == 2 and !tukarPoin.isDelivered}"
+                       class = "btn btn-disabled c3 d-block">Menunggu konfirmasi penerimaan dari donatur</p>
+                    <a sec:authorize="hasAuthority('DONATUR')" th:if="${tukarPoin.status == 2 and !tukarPoin.isDelivered}" type = "button"
+                       class = "btn btn-outline-primary-green h6 d-block" data-bs-toggle="modal" data-bs-target="#konfirmasiTerimaModal">Konfirmasi penerimaan</a>
+                </div>
+                <!-- END MODAL BUTTON -->
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal Hapus -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title h6" id="deleteModalLabel">Hapus Penukaran Poin</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menghapus penukaran poin dengan ID ' + ${tukarPoin.idTukarPoin} + '?'"></div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                <a type="button" class="btn-small btn-red-danger" th:href="@{/penukaran-poin/delete/} + ${tukarPoin.idTukarPoin}">Ya, hapus</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end modal-->
+
+<!-- Modal Setujui -->
+<form th:if="${#authorization.expression('!hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="setujuiModal" tabindex="-1" aria-labelledby="setujuiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6 px-3" id="setujuiModalLabel">Konfirmasi Setujui Penukaran Poin</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="p3">Anda hendak menyetujui penukaran poin ini</p>
+                    <p class="p3">Setelah Anda klik<strong> Ya, Konfirmasi, </strong>Anda tidak dapat membatalkan tindakan ini.</p>
+                    <p class="p3">Apakah Anda ingin melanjutkan?</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-primary-green">Ya, konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<!-- end modal setujui -->
+
+<!-- modal tolak -->
+<form th:if="${#authorization.expression('!hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="tolakModal" tabindex="-1" aria-labelledby="tolakModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6" id="tolakModalLabel">Tolak Penukaran Poin</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p3 mb-2">
+                    Anda hendak menolak penukaran poin ini. Sertakan alasan penolakan Anda. Setelah Anda klik Tolak, Anda tidak dapat membatalkan tindakan ini.
+                    <div class="form-group">
+                        <label for="tolak" class="col-form-label"><strong>Alasan penolakan</strong><span class="text-danger"> *</span></label>
+                        <textarea id="tolak" class="form-control" type="text" th:field="*{keteranganTolak}" placeholder="Masukkan alasan penolakan" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-red-danger">Tolak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--end modal tolak-->
+
+<!-- modal sudah dikirim -->
+<form th:if="${#authorization.expression('!hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}" enctype="multipart/form-data">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="kirimModal" tabindex="-1" aria-labelledby="tolakModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6" id="kirimModalLabel">Reward Sudah Dikirim</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                       <p class="h5 text-raisin-black">Bukti Pengiriman</p>
+                        <label class="col-form-label p3 px-3">Apabila reward dikirim menggunakan jasa pengiriman,
+                            masukkan bukti pengiriman reward. Bukti akan dikirim ke donatur</label>
+                        <input class="form-control p2" type="file" name="filePengiriman" accept="image/png, image/jpeg">
+                    </div>
+                    <div class="form-group">
+                        <p class="h5 text-raisin-black pt-3">Bukti Transaksi Pembelian Reward<span class="text-danger"> *</span></p>
+                        <label class="col-form-label p3 px-3">Bukti transaksi akan digunakan untuk merekap transaksi.</label>
+                        <input required class="form-control p2" type="file" name="fileTransaksi" accept="image/png, image/jpeg">
+                        <div class="invalid-feedback"> Masukkan bukti transaksi </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-primary-green">Konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<!--end modal sudah dikirim-->
+
+<!-- modal dapat diambil -->
+<form th:if="${#authorization.expression('!hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}" enctype="multipart/form-data">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="ambilModal" tabindex="-1" aria-labelledby="ambilModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6" id="ambilModalLabel">Penukaran Poin Dapat Diambil</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p3">
+                    <div class="form-group">
+                        <label class="h5 text-raisin-black">Bukti Transaksi Pembelian Reward<span class="text-danger"> *</span></label>
+                        <label for="buktiTransaksi2" class="col-form-label p3 px-3"> Bukti ini akan digunakan untuk merekap transaksi</label>
+                        <input id="buktiTransaksi2" required class="form-control p2" type="file" name="fileTransaksi" accept="image/png, image/jpeg">
+                        <div class="invalid-feedback">
+                            Masukkan bukti transaksi
+                            </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-primary-green">Ya, sudah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--end modal dapat diambil-->
+
+<!-- modal sudah diambil -->
+<form th:if="${#authorization.expression('hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="konfirmasiAmbilModal" tabindex="-1" aria-labelledby="konfirmasiAmbilModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6" id="konfirmasiAmbilLabel">Konfirmasi Pengambilan Penukaran Poin</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p3" th:text="'Apakah Anda yakin bahwa reward penukaran poin dengan ID ' + ${tukarPoin.idTukarPoin} + ' sudah diambil?'"></div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-primary-green">Ya, konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<!--end modal sudah diambil-->
+
+<!-- modal sudah diterima -->
+<form th:if="${#authorization.expression('hasAuthority(''DONATUR'')')}" th:object="${tukarPoin}" method="POST"
+      th:action="@{/penukaran-poin/update-status}">
+
+    <input type="hidden" th:field="*{idTukarPoin}"/>
+
+    <div class="modal fade" id="konfirmasiTerimaModal" tabindex="-1" aria-labelledby="konfirmasiTerimaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title h6" id="konfirmasiTerimaLabel">Konfirmasi Penerimaan Penukaran Poin</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p3" th:text="'Apakah Anda yakin bahwa reward penukaran poin dengan ID ' + ${tukarPoin.idTukarPoin} + ' sudah diterima?'"></div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-small btn-primary-green">Ya, konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--end modal sudah diterima-->
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<div sec:authorize="hasAuthority('PARTNER')">
+    <nav th:replace="fragments/fragment :: navbar('Riwayat Penjualan', '')"></nav>
+</div>
+<div sec:authorize="hasAuthority('ADMIN') || hasAuthority('MANAJER') || hasAuthority('SUPERVISOR')">
+    <nav th:replace="fragments/fragment :: navbar('Pembelian dan Penjualan', '')"></nav>
+</div>
+
+<div class="d-flex justify-content-center">
+
+    <div class="container my-5">
+
+        <!-- alert -->
+        <div class="alert alert-success" role="alert" th:text="${successDelete}" th:if="${successDelete}"></div>
+        <div class="alert alert-danger" role="alert" th:text="${failedUpdate}" th:if="${failedUpdate}"></div>
+
+        <!-- button & id -->
+        <div class="row my-3">
+            <p class="c3">
+                <a type="button" class="btn-small btn-outline-raisin-black h6 me-4"
+                   th:href="@{/penawaran/sampah/viewall}">
+                    <i class="bi-chevron-left"></i>
+                    Back
+                </a>
+                <text th:text="${penawaranSampah.idPenawaranSampah}" class="c3"></text>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <div class="col-sm-6 w-auto justify-content-start pr-0">
+                <h2 class="h2">Detail Penawaran Sampah</h2>
+            </div>
+            <div class="col-sm-3 w-auto justify-content-start px-0 mx-0" sec:authorize="hasAuthority('PARTNER')"
+                 th:if="${penawaranSampah.status == 0}">
+                <a type="button" class="btn-small-fit btn-primary-green"
+                   th:href="@{/penawaran/sampah/update/} + ${penawaranSampah.idPenawaranSampah}">
+                    <i class="bi bi-pencil-fill"></i>
+                        Edit
+                </a>
+            </div>
+            <div class="col-sm-3 w-auto justify-content-start px-0 mx-0" sec:authorize="hasAuthority('PARTNER')"
+                 th:if="${penawaranSampah.status == 0}">
+                <a type="button" class="mx-2 btn-small-fit btn-red-danger" data-bs-toggle="modal"
+                   data-bs-target="#deletePenawaranSampah">
+                    <i class="bi bi-trash"></i>
+                        Batal
+                </a>
+
+                <!-- modal -->
+                <div class="modal fade" id="deletePenawaranSampah" tabindex="-1" aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                        <div class="modal-content">
+                            <div class="modal-header text-center">
+                                <h6 class="modal-title h6">Batalkan Penawaran Sampah</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p3"
+                                 th:text="'Apakah Anda yakin ingin membatalkan Penawaran Sampah dengan ID ' + ${penawaranSampah.idPenawaranSampah} + ' ?'"></div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn-small btn-outline-raisin-black"
+                                        data-bs-dismiss="modal">Cancel
+                                </button>
+                                <a type="button" class="btn-small btn-red-danger"
+                                   th:href="@{/penawaran/sampah/delete/} + ${penawaranSampah.idPenawaranSampah}">Ya</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end modal-->
+
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- detail card left column -->
+            <div class="col-5">
+                <div class="card rounded-25 shadow-sm m-2 p-2">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <!-- left column -->
+                            <div class="col px-5">
+                                <div class="mb-5 mt-3">
+                                    <p2 class="p2">ID Penawaran Sampah</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.idPenawaranSampah}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Nama PIC</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.namaPic}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Kontak PIC</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.kontakPic}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Tanggal, Waktu Penawaran Sampah</p2>
+                                    <h4 class="h4"
+                                        th:text="${#temporals.format(penawaranSampah.tanggalDibuat, 'dd-MM-yyyy HH:mm')}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Pilihan Pengiriman</p2>
+                                    <h4 class="h4"
+                                        th:text="${penawaranSampah.isPickedUp} ? 'Diambil Oleh Perusahaan' : 'Dikirim Partner'">
+                                    </h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Status</p2>
+                                    <h4 class="h4">
+                                        <div th:if="${penawaranSampah.status == -1}"><span
+                                                class="bi bi-file-earmark-x"></span>Penawaran Sampah Batal
+                                        </div>
+                                        <div th:if="${penawaranSampah.status == 0}"><span
+                                                class="bi bi-hourglass-split"></span> Menunggu Persetujuan
+                                        </div>
+                                        <div th:if="${penawaranSampah.status == 1}"><span
+                                                class="bi bi-file-earmark-check"></span>Penawaran Sampah Disetujui
+                                        </div>
+                                        <div th:if="${penawaranSampah.status == 2}"><span class="bi bi-truck"></span>Dalam
+                                            Perjalanan
+                                        </div>
+                                        <div th:if="${penawaranSampah.status == 3}"><span class="bi bi-search"></span>Dalam
+                                            Proses Inspeksi
+                                        </div>
+                                        <div th:if="${penawaranSampah.status == 4}"><span
+                                                class="bi bi-check-circle"></span>Selesai
+                                        </div>
+                                    </h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Bank</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.bank}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Rekening</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.noRekening}"></h4>
+                                </div>
+                                <div class="my-5">
+                                    <div sec:authorize="hasAuthority('PARTNER')"  class="my-5">
+                                        <p class="p2">Bukti Penjualan</p>
+                                        <p class="h4" th:if="${penawaranSampah.transaksiSampah == NULL }">-</p>
+                                        <div class="zoomin" th:if="${penawaranSampah.transaksiSampah != NULL}">
+                                            <img th:src="${penawaranSampah.transaksiSampah.getBuktiImagePath}"  title="Image" />
+                                        </div>
+                                    </div>
+                                    <div sec:authorize="!hasAuthority('PARTNER')"  class="my-5">
+                                        <p class="p2">Laporan Transaksi</p>
+                                        <p class="h4" th:if="${penawaranSampah.transaksiSampah == NULL }">-</p>
+                                        <a class="h4" th:if="${penawaranSampah.transaksiSampah != NULL }" th:text="${penawaranSampah.transaksiSampah.idTransaksi}"
+                                           th:href="@{/transaksi/view/} + ${penawaranSampah.transaksiSampah.idTransaksi}"></a>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <p2 class="p2">Harga</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.harga}"></h4>
+                                </div>
+                                <div class="my-5" th:if="*{penawaranSampah.status == -1}">
+                                    <p2 class="p2">Keterangan</p2>
+                                    <h4 class="h4" th:text="${penawaranSampah.keterangan}"></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-7">
+                <div class="card rounded-25 m-2 ">
+                    <div class="card-body p-0">
+                        <div class="row mx-0">
+                            <div class="card-wr rounded-top-25 col-12 justify-content-center align-content-center">
+                                <div class="text-center p-2 ">
+                                    <strong class="text-white p-2 h5">Berat (Kg)</strong>
+                                </div>
+                            </div>
+                            <div class="=col-12 justify-content-center align-content-center">
+                                <div class="text-center">
+                                    <div class="p-3 p2 " th:text="${penawaranSampah.berat}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card rounded-25 m-2 mt-5">
+                    <div class="card-body p-0">
+                        <div class="row mx-0">
+                            <div class="card-wr rounded-top-25 col-12 justify-content-center align-content-center">
+                                <div class="text-center p-2">
+                                    <div th:if="*{penawaranSampah.status == 4}">
+                                        <strong class="text-white p-2 h5">Hasil Inspeksi Sampah</strong>
+                                    </div>
+                                    <div th:unless="*{penawaranSampah.status == 4}">
+                                        <strong class="text-white p-2 h5">Jenis Sampah</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:unless="*{penawaranSampah.status == 4}">
+                            <div class="col-12 mt-2 p-0">
+                                <table class="table table-striped mx-0 text-center">
+                                    <tbody>
+                                    <tr th:each="itemPenawaranSampah, iterationStatus : ${listItemPenawaranSampah}">
+                                        <td th:text="${itemPenawaranSampah.idItem.jenisItem.namaJenis}"></td>
+                                        <td th:text="${itemPenawaranSampah.idItem.namaItem}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+
+                            <div th:if="*{penawaranSampah.status == 4}">
+                                <div class="col-12 mt-2 p-0">
+                                    <table class="table table-striped mx-0 text-center">
+                                        <tbody>
+                                        <tr th:each="itemPenawaranSampah, iterationStatus : ${listItemPenawaranSampah}">
+                                            <td th:text="${itemPenawaranSampah.idItem.jenisItem.namaJenis}"></td>
+                                            <td th:text="${itemPenawaranSampah.idItem.namaItem}"></td>
+                                            <td th:text="${itemPenawaranSampah.kuantitas} + 'Kg'"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- button selesai inspeksi -->
+                <div th:if="*{penawaranSampah.status == 3}">
+                    <a sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+                       class="mt-5 col-12 btn btn-primary-green"
+                       th:href="@{/penawaran/sampah/selesai/} + ${penawaranSampah.idPenawaranSampah}">
+                        Selesai
+                    </a>
+                </div>
+                <!-- button menerima sampah // dalam proses inspeksi -->
+                <div th:if="*{penawaranSampah.status == 2}">
+                    <button sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+                            class="mt-5 col-12 btn btn-primary-green" data-bs-toggle="modal"
+                            data-bs-target="#Diterima">
+                        Sampah Sudah Sampai di Warehouse
+                    </button>
+                </div>
+
+                <!-- button kirim penawaran -->
+                <div th:if="*{penawaranSampah.status == 1 AND penawaranSampah.isPickedUp==true }">
+                    <button sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+                            class="mt-5 col-12 btn btn-primary-green" data-bs-toggle="modal"
+                            data-bs-target="#KirimPenawaran">
+                        Sampah Sudah Dikirimkan
+                    </button>
+                </div>
+                <div th:if="*{penawaranSampah.status == 1 AND penawaranSampah.isPickedUp==false}">
+                    <button sec:authorize="hasAuthority('PARTNER')" class="mt-5 col-12 btn btn-primary-green"
+                            data-bs-toggle="modal"
+                            data-bs-target="#KirimPenawaran">
+                        Sampah Sudah Dikirimkan
+                    </button>
+                </div>
+
+                <!-- button setujui penawaran -->
+                <div th:if="*{penawaranSampah.status == 0}">
+                    <button sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+                            class="mt-5 col-12 btn btn-primary-green" data-bs-toggle="modal"
+                            data-bs-target="#SetujuiPenawaran">
+                        Setujui Penawaran Sampah
+                    </button>
+                </div>
+
+                <!-- button tolak penawaran -->
+                <div th:if="*{penawaranSampah.status == 0}">
+                    <button sec:authorize="hasAuthority('SUPERVISOR') || hasAuthority('MANAJER') || hasAuthority('ADMIN')"
+                            class="col-12 btn btn-red-danger" data-bs-toggle="modal"
+                            data-bs-target="#TolakPenawaran">
+                        Tolak Penawaran Sampah
+                    </button>
+                    <!-- modal tolak penawaran -->
+                    <div class="modal fade" id="TolakPenawaran" tabindex="-1" aria-labelledby="exampleModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                            <div class="modal-content">
+                                <div class="modal-header text-center">
+                                    <h6 class="modal-title h6">Menolak Penawaran Sampah</h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p3"
+                                     th:text="'Apakah Anda yakin ingin menolak Penawaran Sampah dengan ID ' + ${penawaranSampah.idPenawaranSampah} + ' ?'"></div>
+                                <div class="modal-body p3">Status akan berubah menjadi 'Ditolak' setelah Anda klik setuju</div>
+                                <form class="m-1 p-2" th:action="@{/penawaran/sampah/persetujuan/ditolak}"
+                                      th:object="${penawaranSampah}" method="POST">
+                                    <input type="hidden" th:value="${penawaranSampah.idPenawaranSampah}"
+                                           th:name="|idPenawaranSampah|">
+                                    <input type="hidden" th:value="${penawaranSampah.status}"
+                                           th:name="|status|">
+                                    <label class="h6 text-raisin-black text-start">Keterangan<span class="text-danger"> *</span></label>
+                                    <textarea required class="form-control p3" th:field="*{keterangan}"></textarea>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" name="save" class="btn-small btn-red-danger">Ya, tolak</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--end modal-->
+                </div>
+
+
+                <!-- modal setujui penawaran -->
+                <div class="modal fade" id="SetujuiPenawaran" tabindex="-1" aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                        <div class="modal-content">
+                            <div class="modal-header text-center">
+                                <h6 class="modal-title h6">Setujui Penawaran Sampah</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p3"
+                                 th:text="'Apakah Anda yakin ingin menyetujui Penawaran Sampah dengan ID ' + ${penawaranSampah.idPenawaranSampah} + ' ?'"></div>
+                            <div class="modal-footer justify-content-center">
+                                <form class="m-1 p-2" th:action="@{/penawaran/sampah/persetujuan}"
+                                      th:object="${penawaranSampah}" method="POST">
+                                    <input type="hidden" th:value="${penawaranSampah.idPenawaranSampah}"
+                                           th:name="|idPenawaranSampah|">
+                                    <input type="hidden" th:value="${penawaranSampah.status}"
+                                           th:name="|status|">
+
+                                    <button type="button" class="btn-small btn-outline-raisin-black"
+                                            data-bs-dismiss="modal">Cancel
+                                    </button>
+                                    <button type="submit" name="save" class="btn btn-small btn-primary-green">Ya
+                                    </button>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end modal-->
+            </div>
+
+            <!-- modal kirim penawaran -->
+            <div class="modal fade" id="KirimPenawaran" tabindex="-1" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                    <div class="modal-content">
+                        <div class="modal-header text-center">
+                            <h6 class="modal-title h6">Kirim Penawaran Sampah</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p3"
+                             th:text="'Apakah Anda yakin telah mengirimkan sampah yang sesuai dengan Penawaran Sampah dengan ID ' + ${penawaranSampah.idPenawaranSampah} + ' ?'"></div>
+                        <div class="modal-footer justify-content-center">
+                            <form class="m-1 p-2" th:action="@{/penawaran/sampah/persetujuan}"
+                                  th:object="${penawaranSampah}" method="POST">
+                                <input type="hidden" th:value="${penawaranSampah.idPenawaranSampah}"
+                                       th:name="|idPenawaranSampah|">
+                                <input type="hidden" th:value="${penawaranSampah.status}"
+                                       th:name="|status|">
+
+                                <button type="button" class="btn-small btn-outline-raisin-black"
+                                        data-bs-dismiss="modal">Cancel
+                                </button>
+                                <button type="submit" name="save" class="btn btn-small btn-primary-green">Ya</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end modal-->
+
+            <!-- modal kirim penawaran -->
+            <div class="modal fade" id="Diterima" tabindex="-1" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                    <div class="modal-content">
+                        <div class="modal-header text-center">
+                            <h6 class="modal-title h6">Sampah Diterima</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p3"
+                             th:text="'Apakah Anda yakin bahwa sampah yang datang merupakan Penawaran Sampah dengan ID ' + ${penawaranSampah.idPenawaranSampah} + ' ?'"></div>
+                        <div class="modal-footer justify-content-center">
+                            <form class="m-1 p-2" th:action="@{/penawaran/sampah/persetujuan}"
+                                  th:object="${penawaranSampah}" method="POST">
+                                <input type="hidden" th:value="${penawaranSampah.idPenawaranSampah}"
+                                       th:name="|idPenawaranSampah|">
+                                <input type="hidden" th:value="${penawaranSampah.status}"
+                                       th:name="|status|">
+
+                                <button type="button" class="btn-small btn-outline-raisin-black"
+                                        data-bs-dismiss="modal">Cancel
+                                </button>
+                                <button type="submit" name="save" class="btn btn-small btn-primary-green">Ya</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end modal-->
+
+        </div>
+    </div>
+
+</div>
+
+<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>

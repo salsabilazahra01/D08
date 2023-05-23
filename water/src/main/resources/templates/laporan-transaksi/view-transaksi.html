@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+
+<body>
+<nav th:replace="fragments/fragment :: navbar('Laporan', '')"></nav>
+
+<div class="d-flex justify-content-center">
+
+    <div class="container my-5">
+
+        <!-- alert -->
+        <div class="alert alert-success" role="alert" th:text="${success}" th:if="${success}"></div>
+
+        <!-- button & id -->
+        <div class="row my-3">
+            <p class="c3">
+                <a type = "button" class = "btn-small btn-outline-raisin-black h6 me-4" th:href="@{/transaksi/viewall/semua}">
+                    <i class="bi-chevron-left"></i> Back
+                </a>
+                <text class="c3" th:text="${transaksi.idTransaksi}"></text>
+            </p>
+        </div>
+
+        <!-- title -->
+        <div class="row mt-3 mb-4">
+            <h2 class="h2">Detail Transaksi</h2>
+        </div>
+
+        <!-- detail -->
+        <div class="card rounded-25 shadow-sm m-2 p-2">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 px-5">
+                        <div class="mb-5 mt-3">
+                            <p class="p2">ID Transaksi</p>
+                            <h3 class="h4" th:text="${transaksi.idTransaksi}"></h3>
+                        </div>
+                        <div class="my-5" th:switch="${transaksi.proses}">
+                            <p class="p2">Pihak Terkait</p>
+                            <h3 class="h4" th:case="0" th:text="'[PARTNER] ' + ${transaksi.penawaranSampah.namaPic}"></h3>
+                            <h3 class="h4" th:case="1" th:text="'[CUSTOMER] ' + ${transaksi.penawaranOlahan.namaCustomer}"></h3>
+                            <h3 class="h4" th:case="2" th:text="${transaksi.person}"></h3>
+                            <h3 class="h4" th:case="3" th:text="'[DONATUR] ' + ${transaksi.tukarPoin.namaDonatur}"></h3>
+                        </div>
+                        <div class="mt-5 mb-3">
+                            <p class="p2">Jenis</p>
+                            <h3 class="h4" th:text="${transaksi.jenisTransaksi} ? 'Pengeluaran':'Pendapatan'"></h3>
+                        </div>
+                    </div>
+                    <div class="col-4 px-5">
+                        <div class="mb-5 mt-3" th:switch="${transaksi.proses}">
+                            <p class="p2">Sumber</p>
+                            <a class="h4" th:case="0" th:text="${transaksi.penawaranSampah.idPenawaranSampah}"
+                                th:href="@{/penawaran/sampah/view/} + ${transaksi.penawaranSampah.idPenawaranSampah}"></a>
+                            <a class="h4" th:case="1" th:text="${transaksi.penawaranOlahan.idPenawaranOlahan}"
+                               th:href="@{/penawaran-hasil-olahan/view/} + ${transaksi.penawaranOlahan.idPenawaranOlahan}"></a>
+                            <h3 class="h4" th:case="2" th:text="${transaksi.namaProses}"></h3>
+                            <a class="h4" th:case="3" th:text="${transaksi.tukarPoin.idTukarPoin}"
+                               th:href="@{/penukaran-poin/view/} + ${transaksi.tukarPoin.idTukarPoin}"></a>
+                        </div>
+                        <div class="mt-5 mb-3">
+                            <p class="p2">Keterangan</p>
+                            <h3 class="h4" th:text="${transaksi.keterangan == '' || transaksi.keterangan == NULL} ? '-' : ${transaksi.keterangan}"></h3>
+                        </div>
+                        <div class="mt-5 mb-3">
+                            <p class="p2">Bukti</p>
+                            <div class="zoomin">
+                                <img th:src="${transaksi.buktiImagePath}" title="Image" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 px-5">
+                        <div class="mb-5 mt-3">
+                            <p class="p2">Tanggal Transaksi</p>
+                            <h3 class="h4" th:text="${#temporals.format(transaksi.tanggalTransaksi, 'dd-MM-yyyy HH:mm')}"></h3>
+                        </div>
+                        <div class="mt-5 mb-3">
+                            <p class="p2">Nominal</p>
+                            <h3 class="h4" th:text="'Rp ' + ${#numbers.formatDecimal(transaksi.nominal, 0, 'POINT', 2, 'COMMA')}"></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="row flex-row-reverse text-end">
+                    <div class="col-4">
+                        <a type="button" class="mx-2 btn-small btn-primary-green" th:href="@{/transaksi/update/} + ${transaksi.idTransaksi}">Update</a>
+                        <button th:if="${transaksi.proses == 2}" type="button" class="mx-2 btn-small btn-red-danger"  data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Delete
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered text-center justify-content-center">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title h6" id="exampleModalLabel">Hapus Transaksi</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p3" th:text="'Apakah Anda yakin ingin menghapus transaksi dengan ID ' + ${transaksi.idTransaksi} + '?'"></div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn-small btn-outline-raisin-black" data-bs-dismiss="modal">Cancel</button>
+                                        <a type="button" class="btn-small btn-red-danger" th:href="@{/transaksi/delete/} + ${transaksi.idTransaksi}">Ya, hapus</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end modal-->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src = "/bootstrap/js/bootstrap.js"></script>
+<script src="/script.js"></script>
+
+</body>
+</html>
